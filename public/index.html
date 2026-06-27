@@ -115,10 +115,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
     <div class="progress-label"><span>Progress</span><span id="progress-pct">0%</span></div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
     <div style="margin-top:10px">
-      <div id="db-status" style="font-size:11px;padding:6px 8px;border-radius:6px;background:var(--surface-alt);color:var(--text-muted);display:flex;align-items:center;gap:6px">
+      <div id="db-status" style="font-size:11px;padding:6px 8px;border-radius:6px;background:var(--surface-alt);color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-bottom:8px">
         <span id="db-dot" style="width:7px;height:7px;border-radius:50%;background:#ccc;flex-shrink:0;display:inline-block"></span>
         <span id="db-label">Connecting...</span>
       </div>
+      <button onclick="downloadAllOutputs()" style="width:100%;padding:8px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1e4d6b,#1d9e75);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:0.02em">
+        <span style="font-size:14px">&#11015;</span> Download All Outputs
+      </button>
+      <div id="download-status" style="font-size:10px;color:var(--text-muted);text-align:center;margin-top:5px;min-height:14px"></div>
     </div>
   </div>
 </nav>
@@ -1484,6 +1488,214 @@ function downloadFile(content, filename, mimeType) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+
+// ── Download All Outputs ──────────────────────────────────────────────────────
+async function downloadAllOutputs() {
+  if (typeof XLSX === 'undefined') { showToast('Excel library loading, try again in a moment'); return; }
+
+  var btn = document.querySelector('[onclick="downloadAllOutputs()"]');
+  if (btn) { btn.textContent = 'Building...'; btn.disabled = true; }
+
+  var statusEl = document.getElementById('download-status');
+  if (statusEl) statusEl.textContent = 'Fetching data...';
+
+  try {
+    // Fetch fresh data from DB
+    var results = await Promise.all([
+      apiGet('/metrics'),
+      apiGet('/roadmap'),
+      apiGet('/actions'),
+      apiGet('/dri'),
+      apiGet('/notes'),
+    ]);
+    var metrics      = results[0];
+    var roadmap      = results[1];
+    var actions      = results[2];
+    var driMap       = results[3];
+    var notes        = results[4];
+
+    if (statusEl) statusEl.textContent = 'Building Excel...';
+
+    var wb = XLSX.utils.book_new();
+    var today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+    // ── Styles ──────────────────────────────────────────────────────────────
+    var hdr = function(color) {
+      return { font:{bold:true,color:{rgb:'FFFFFF'}}, fill:{fgColor:{rgb:color||'1E4D6B'}}, alignment:{horizontal:'center',wrapText:true} };
+    };
+    var wrap = { alignment:{wrapText:true,vertical:'top'} };
+    var bold = { font:{bold:true} };
+
+    // ─────────────────────────────────────────────────────────────────────
+    // SHEET 1: Metrics & Targets
+    // ─────────────────────────────────────────────────────────────────────
+    var mHeaders = ['Pillar','DRI','Metric Name','Exec Question','Formula','Type',
+                    'L1','L2','L3','L4 (Target)','L5','L6','H2 Target'];
+    var mRows = metrics.map(function(m) {
+      return [m.pillar, m.dri||'', m.name, m.question, m.formula, m.type,
+              m.l1||'', m.l2||'', m.l3||'', m.l4||'', m.l5||'', m.l6||'', m.h2_target||''];
+    });
+    var mSheet = XLSX.utils.aoa_to_sheet([mHeaders].concat(mRows));
+    mHeaders.forEach(function(_,i) {
+      var cell = mSheet[XLSX.utils.encode_cell({r:0,c:i})];
+      if (cell) cell.s = hdr('1E4D6B');
+    });
+    mSheet['!cols'] = [12,14,26,34,38,9,10,10,10,10,10,10,10].map(function(w){return{wch:w};});
+    mSheet['!freeze'] = {xSplit:0,ySplit:1,topLeftCell:'A2',activePane:'bottomLeft'};
+    XLSX.utils.book_append_sheet(wb, mSheet, 'Metrics & Targets');
+
+    // ─────────────────────────────────────────────────────────────────────
+    // SHEET 2: H2 Roadmap
+    // ─────────────────────────────────────────────────────────────────────
+    var wsNames = {lifecycle:'1. Customer Lifecycle Excellence', intel:'2. Customer Intelligence & AI',
+                   ops:'3. Customer Operations Excellence', people:'4. People Excellence'};
+    var phaseNames = {0:'Month 1',1:'Month 2',2:'Month 3',3:'Month 4',4:'Month 5',5:'Month 6'};
+    var rmHeaders = ['Workstream','Phase','Activity / Item Text','Pillar','DRI',
+                     'People to Work With','Due Date','Comments'];
+    var rmRows = roadmap
+      .sort(function(a,b){ return (a.phase - b.phase) || (a.ws||'').localeCompare(b.ws||''); })
+      .map(function(it) {
+        return [wsNames[it.ws]||it.ws, phaseNames[it.phase]||it.phase,
+                it.text, it.pillar, it.dri||'', it.people||'', it.due||'', it.comments||''];
+      });
+    var rmSheet = XLSX.utils.aoa_to_sheet([rmHeaders].concat(rmRows));
+    rmHeaders.forEach(function(_,i) {
+      var cell = rmSheet[XLSX.utils.encode_cell({r:0,c:i})];
+      if (cell) cell.s = hdr('1D9E75');
+    });
+    rmSheet['!cols'] = [34,10,36,14,14,22,12,30].map(function(w){return{wch:w};});
+    rmSheet['!freeze'] = {xSplit:0,ySplit:1,topLeftCell:'A2',activePane:'bottomLeft'};
+    XLSX.utils.book_append_sheet(wb, rmSheet, 'H2 Roadmap');
+
+    // ─────────────────────────────────────────────────────────────────────
+    // SHEET 3: Workstream wise plan (Pillar x Month pivot)
+    // ─────────────────────────────────────────────────────────────────────
+    var pillars = ['Onboarding','Adoption','Success','Retention','Advocacy',
+                   'Support','Intelligence','Technology','Escalation','People'];
+    var months  = [0,1,2,3,4,5];
+    // Header row: Pillar | DRI | Month 1 ... Month 6
+    var wsHeaders = ['Pillar','DRI','Month 1','Month 2','Month 3','Month 4','Month 5','Month 6'];
+    var wsRows = pillars.map(function(p) {
+      var dri = driMap[p] || '';
+      var cells = months.map(function(ph) {
+        var items = roadmap.filter(function(it){ return it.pillar===p && it.phase===ph; });
+        return items.map(function(it){ return '- '+it.text; }).join('\n');
+      });
+      return [p, dri].concat(cells);
+    });
+    var wsSheet = XLSX.utils.aoa_to_sheet([wsHeaders].concat(wsRows));
+    wsHeaders.forEach(function(_,i) {
+      var cell = wsSheet[XLSX.utils.encode_cell({r:0,c:i})];
+      if (cell) cell.s = hdr('4A3AA7');
+    });
+    // Wrap all data cells
+    for (var r=1; r<=pillars.length; r++) {
+      for (var c=0; c<wsHeaders.length; c++) {
+        var addr = XLSX.utils.encode_cell({r:r,c:c});
+        if (wsSheet[addr]) wsSheet[addr].s = wrap;
+      }
+    }
+    wsSheet['!cols'] = [16,14,28,28,28,28,28,28].map(function(w){return{wch:w};});
+    wsSheet['!freeze'] = {xSplit:2,ySplit:1,topLeftCell:'C2',activePane:'bottomRight'};
+    XLSX.utils.book_append_sheet(wb, wsSheet, 'Workstream wise plan');
+
+    // ─────────────────────────────────────────────────────────────────────
+    // SHEET 4: Action Items
+    // ─────────────────────────────────────────────────────────────────────
+    var aiHeaders = ['#','Item Details','Owner','Expected Closure','Status','Comments'];
+    var aiRows = actions.map(function(a,i) {
+      return [i+1, a.detail, a.owner||'', a.due||'', a.status, a.comments||''];
+    });
+    var aiSheet = XLSX.utils.aoa_to_sheet([aiHeaders].concat(aiRows));
+    aiHeaders.forEach(function(_,i) {
+      var cell = aiSheet[XLSX.utils.encode_cell({r:0,c:i})];
+      if (cell) cell.s = hdr('E34948');
+    });
+    // Colour-code status cells
+    var statusColors = {open:'0c447c',inprogress:'633806',done:'27500a',blocked:'791f1f'};
+    var statusBg     = {open:'E6F1FB',inprogress:'FAEEDA',done:'EAF3DE',blocked:'FCEBEB'};
+    for (var r=1; r<=aiRows.length; r++) {
+      var statusVal = (aiRows[r-1][4]||'').toLowerCase();
+      var bg = statusBg[statusVal] || 'FFFFFF';
+      var fg = statusColors[statusVal] || '000000';
+      var sAddr = XLSX.utils.encode_cell({r:r,c:4});
+      if (aiSheet[sAddr]) aiSheet[sAddr].s = {font:{color:{rgb:fg},bold:true},fill:{fgColor:{rgb:bg}},alignment:{horizontal:'center'}};
+    }
+    aiSheet['!cols'] = [4,42,16,14,12,34].map(function(w){return{wch:w};});
+    aiSheet['!freeze'] = {xSplit:0,ySplit:1,topLeftCell:'A2',activePane:'bottomLeft'};
+    XLSX.utils.book_append_sheet(wb, aiSheet, 'Action Items');
+
+    // ─────────────────────────────────────────────────────────────────────
+    // SHEET 5: Workshop Notes
+    // ─────────────────────────────────────────────────────────────────────
+    var noteRows = [
+      ['Section','Notes'],
+      ['Day 1', notes.day1||''],
+      ['Day 2', notes.day2||''],
+      ['Day 3', notes.day3||''],
+      ['Parking Lot', notes.parking||''],
+    ];
+    var notesSheet = XLSX.utils.aoa_to_sheet(noteRows);
+    var nhdr = notesSheet[XLSX.utils.encode_cell({r:0,c:0})];
+    if (nhdr) nhdr.s = hdr('898781');
+    var nhdr2 = notesSheet[XLSX.utils.encode_cell({r:0,c:1})];
+    if (nhdr2) nhdr2.s = hdr('898781');
+    notesSheet['!cols'] = [{wch:14},{wch:100}];
+    for (var r=1; r<noteRows.length; r++) {
+      var addr0 = XLSX.utils.encode_cell({r:r,c:0});
+      var addr1 = XLSX.utils.encode_cell({r:r,c:1});
+      if (notesSheet[addr0]) notesSheet[addr0].s = bold;
+      if (notesSheet[addr1]) notesSheet[addr1].s = wrap;
+      notesSheet.row_heights = notesSheet.row_heights || {};
+    }
+    XLSX.utils.book_append_sheet(wb, notesSheet, 'Workshop Notes');
+
+    // ─────────────────────────────────────────────────────────────────────
+    // SHEET 6: Cover / Summary
+    // ─────────────────────────────────────────────────────────────────────
+    var coverData = [
+      ['CX Leadership — H2 2026 Planning Workshop Outputs'],
+      ['Generated on: ' + today],
+      [''],
+      ['Sheet', 'Contents', 'Rows'],
+      ['Metrics & Targets', 'All KPIs with benchmarks and H2 targets', metrics.length],
+      ['H2 Roadmap', 'All activity cards across 4 workstreams and 6 months', roadmap.length],
+      ['Workstream wise plan', 'Pillar x Month view with DRI assignments', pillars.length],
+      ['Action Items', 'Action tracker with owner, status, and due dates', actions.length],
+      ['Workshop Notes', 'Day 1, Day 2, Day 3, and Parking Lot notes', 4],
+    ];
+    var coverSheet = XLSX.utils.aoa_to_sheet(coverData);
+    var titleCell = coverSheet[XLSX.utils.encode_cell({r:0,c:0})];
+    if (titleCell) titleCell.s = { font:{bold:true,sz:16,color:{rgb:'1E4D6B'}} };
+    var dateCell = coverSheet[XLSX.utils.encode_cell({r:1,c:0})];
+    if (dateCell) dateCell.s = { font:{italic:true,color:{rgb:'898781'}} };
+    ['A','B','C'].forEach(function(col) {
+      var cell = coverSheet[col+'4'];
+      if (cell) cell.s = hdr('1E4D6B');
+    });
+    coverSheet['!cols'] = [{wch:24},{wch:56},{wch:10}];
+    // Move cover to first position
+    wb.SheetNames.unshift('Cover');
+    wb.Sheets['Cover'] = coverSheet;
+    wb.SheetNames = ['Cover','Metrics & Targets','H2 Roadmap','Workstream wise plan','Action Items','Workshop Notes'];
+
+    // ── Download ───────────────────────────────────────────────────────────
+    var dateStr = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, 'CX_Workshop_H2_2026_Outputs_' + dateStr + '.xlsx');
+
+    if (statusEl) statusEl.textContent = 'Downloaded successfully';
+    setTimeout(function() { if (statusEl) statusEl.textContent = ''; }, 3000);
+    showToast('All outputs downloaded');
+
+  } catch(err) {
+    if (statusEl) statusEl.textContent = 'Download failed';
+    showToast('Download failed: ' + err.message);
+    console.error(err);
+  } finally {
+    if (btn) { btn.innerHTML = '<span style="font-size:14px">&#11015;</span> Download All Outputs'; btn.disabled = false; }
+  }
 }
 
 // ── Init ──

@@ -350,7 +350,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
       <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Pillar</label><select id="rm-pillar" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option>Onboarding</option><option>Adoption</option><option>Success</option><option>Retention</option><option>Advocacy</option><option>Support</option><option>Intelligence</option><option>Technology</option><option>Escalation</option><option>People</option></select></div>
       <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Workstream</label><select id="rm-ws" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option value="lifecycle">1. Customer Lifecycle Excellence</option><option value="intel">2. Customer Intelligence &amp; AI</option><option value="ops">3. Customer Operations Excellence</option><option value="people">4. People Excellence</option></select></div>
     </div>
-    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Phase</label><select id="rm-phase" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option value="0">Month 1 - Standardize</option><option value="1">Month 2 - Instrument</option><option value="2">Month 3 - Predict</option><option value="3">Month 4 - Automate</option><option value="4">Month 5 - Optimize</option><option value="5">Month 6 - Scale</option></select></div>
+    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Phase</label><select id="rm-phase" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option value="0">Month 1</option><option value="1">Month 2</option><option value="2">Month 3</option><option value="3">Month 4</option><option value="4">Month 5</option><option value="5">Month 6</option></select></div>
     <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">DRI</label><input id="rm-dri" type="text" placeholder="e.g. Jidesh M" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
       <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">People to work with</label><input id="rm-people" type="text" placeholder="e.g. Deepak V, Anirban M" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
@@ -506,7 +506,7 @@ const WORKSTREAMS = [
 ];
 
 const PILLAR_NAMES = ['Onboarding','Adoption','Success','Retention','Advocacy','Support','Intelligence','Technology','Escalation','People'];
-const PHASE_NAMES  = ['Month 1 - Standardize','Month 2 - Instrument','Month 3 - Predict','Month 4 - Automate','Month 5 - Optimize','Month 6 - Scale'];
+const PHASE_NAMES  = ['Month 1','Month 2','Month 3','Month 4','Month 5','Month 6'];
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let metricTargets = {};
@@ -709,14 +709,14 @@ function cancelDelete() { pendingDeleteId = null; renderMetrics(); }
 function renderRoadmap() {
   var wsFilter = document.getElementById('rm-filter-ws') ? document.getElementById('rm-filter-ws').value : 'all';
   var pillarFilter = document.getElementById('rm-filter-pillar') ? document.getElementById('rm-filter-pillar').value : 'all';
-  var phaseShort = ['Standardize','Instrument','Predict','Automate','Optimize','Scale'];
+  var phaseShort = ['Month 1','Month 2','Month 3','Month 4','Month 5','Month 6'];
   var icons = {lifecycle:'ti-users',intel:'ti-cpu',ops:'ti-shield',people:'ti-school'};
   var visibleWS = wsFilter === 'all' ? WORKSTREAMS : WORKSTREAMS.filter(function(w) { return w.id === wsFilter; });
 
   var html = '<table style="width:100%;border-collapse:collapse;min-width:820px"><thead><tr>';
   html += '<th style="width:150px;text-align:left;padding:8px 12px;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);background:var(--surface)">Workstream</th>';
   phaseShort.forEach(function(ph,i) {
-    html += '<th style="padding:8px 10px;font-size:10px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);background:var(--surface);text-align:center;min-width:130px"><div style="color:var(--text-secondary)">Month '+(i+1)+'</div><div style="font-weight:400;text-transform:none;letter-spacing:0;font-size:9px;color:var(--text-muted);margin-top:1px">'+ph+'</div></th>';
+    html += '<th style="padding:8px 10px;font-size:11px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);background:var(--surface);text-align:center;min-width:130px">'+ph+'</th>';
   });
   html += '</tr></thead><tbody>';
 
@@ -826,13 +826,12 @@ var ownerChartInstance = null;
 function renderOwners() {
   var pillarFilter = document.getElementById('ow-filter-pillar') ? document.getElementById('ow-filter-pillar').value : 'all';
   var phaseLabels = ['Month 1','Month 2','Month 3','Month 4','Month 5','Month 6'];
-  var phaseThemes = ['Standardize','Instrument','Predict','Automate','Optimize','Scale'];
   var allPillars = pillarFilter === 'all' ? PILLAR_NAMES : [pillarFilter];
 
   var html = '<table style="width:100%;border-collapse:collapse;min-width:900px"><thead><tr>';
   html += '<th style="width:170px;text-align:left;padding:10px 12px;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);background:var(--surface)">Pillar / DRI</th>';
   phaseLabels.forEach(function(ph,i) {
-    html += '<th style="padding:8px 10px;font-size:10px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);background:var(--surface);text-align:center;min-width:130px"><div style="color:var(--text-secondary)">'+ph+'</div><div style="font-weight:400;text-transform:none;letter-spacing:0;font-size:9px;color:var(--text-muted);margin-top:1px">'+phaseThemes[i]+'</div></th>';
+    html += '<th style="padding:8px 10px;font-size:11px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);background:var(--surface);text-align:center;min-width:130px">'+ph+'</th>';
   });
   html += '</tr></thead><tbody>';
 
@@ -1282,7 +1281,7 @@ function downloadRoadmapTemplate() {
   var pillars    = ['Onboarding','Adoption','Success','Retention','Advocacy','Support','Intelligence','Technology','Escalation','People'];
   var wsList     = ['1. Customer Lifecycle Excellence','2. Customer Intelligence & AI','3. Customer Operations Excellence','4. People Excellence'];
   var wsValues   = ['lifecycle','intel','ops','people'];
-  var phaseList  = ['Month 1 - Standardize','Month 2 - Instrument','Month 3 - Predict','Month 4 - Automate','Month 5 - Optimize','Month 6 - Scale'];
+  var phaseList  = ['Month 1','Month 2','Month 3','Month 4','Month 5','Month 6'];
 
   // ── Headers ───────────────────────────────────────────────────────────────
   var headers = ['Workstream','Phase','Activity / Item Text','Pillar','DRI','People to Work With','Due Date (YYYY-MM-DD)','Comments'];
@@ -1295,7 +1294,7 @@ function downloadRoadmapTemplate() {
   // ── Sample data row ───────────────────────────────────────────────────────
   var sampleRow = [
     '1. Customer Lifecycle Excellence',
-    'Month 1 - Standardize',
+    'Month 1',
     'Customer health score rollout',
     'Retention',
     'Deepak V',
@@ -1369,7 +1368,7 @@ function downloadRoadmapTemplate() {
     [''],
     ['Column', 'Required?', 'Notes'],
     ['Workstream', 'Required', 'Select from dropdown: 1. Customer Lifecycle Excellence / 2. Customer Intelligence & AI / 3. Customer Operations Excellence / 4. People Excellence'],
-    ['Phase', 'Required', 'Select from dropdown: Month 1 - Standardize through Month 6 - Scale'],
+    ['Phase', 'Required', 'Select from dropdown: Month 1 through Month 6'],
     ['Activity / Item Text', 'Required', 'Short description of the activity card e.g. Customer health score rollout'],
     ['Pillar', 'Optional', 'Select from dropdown: Onboarding, Adoption, Success, Retention, Advocacy, Support, Intelligence, Technology, Escalation, People'],
     ['DRI', 'Optional', 'Single person directly responsible e.g. Jidesh M'],
@@ -1427,12 +1426,12 @@ function bulkUploadRoadmap(event) {
       '4. people excellence': 'people', '4': 'people'
     };
     var phaseMap = {
-      'month 1 - standardize': 0, 'month 1': 0, '1': 0,
-      'month 2 - instrument':  1, 'month 2': 1, '2': 1,
-      'month 3 - predict':     2, 'month 3': 2, '3': 2,
-      'month 4 - automate':    3, 'month 4': 3, '4': 3,
-      'month 5 - optimize':    4, 'month 5': 4, '5': 4,
-      'month 6 - scale':       5, 'month 6': 5, '6': 5,
+      'month 1': 0, '1': 0,
+      'month 2': 1, '2': 1,
+      'month 3': 2, '3': 2,
+      'month 4': 3, '4': 3,
+      'month 5': 4, '5': 4,
+      'month 6': 5, '6': 5,
     };
     var textKey = rows[0] ? (Object.keys(rows[0]).find(function(k){ return k === 'Activity / Item Text' || k === 'Text'; }) || 'Text') : 'Text';
     var valid = rows.filter(function(r) { return (r[textKey]||r['Text']) && r['Workstream']; });

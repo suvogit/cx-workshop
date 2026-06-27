@@ -191,10 +191,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
     <div style="overflow-x:auto">
       <table class="metrics-table" style="min-width:900px">
         <thead><tr>
-          <th style="width:160px">Metric</th><th style="width:120px">Pillar</th>
-          <th style="width:200px">Formula</th><th style="width:70px">Type</th>
-          <th style="width:72px">L2</th><th style="width:72px">L3</th>
-          <th style="width:80px">L4 benchmark</th><th style="width:96px">H2 target</th>
+          <th style="width:140px">Metric</th><th style="width:100px">Pillar</th>
+          <th style="width:110px">DRI</th>
+          <th style="width:180px">Formula</th><th style="width:65px">Type</th>
+          <th style="width:58px">L1</th><th style="width:58px">L2</th><th style="width:58px">L3</th>
+          <th style="width:70px">L4 target</th>
+          <th style="width:58px">L5</th><th style="width:58px">L6</th>
+          <th style="width:90px">H2 target</th>
           <th style="width:110px">Actions</th>
         </tr></thead>
         <tbody id="metrics-tbody-main"></tbody>
@@ -308,17 +311,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
   <div style="background:var(--surface);border-radius:12px;border:0.5px solid var(--border-strong);padding:24px 28px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto">
     <h2 style="font-size:16px;font-weight:500;margin-bottom:18px" id="modal-title">Add metric</h2>
     <input type="hidden" id="modal-metric-id">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Metric name</label><input id="mf-name" type="text" placeholder="e.g. Expansion ARR %" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Metric name</label><input id="mf-name" type="text" placeholder="e.g. NRR" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
       <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Pillar</label><select id="mf-pillar" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option>Onboarding</option><option>Adoption</option><option>Success</option><option>Retention</option><option>Advocacy</option><option>Support</option><option>Intelligence</option><option>Technology</option><option>Escalation</option><option>People</option></select></div>
     </div>
-    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Exec question</label><input id="mf-question" type="text" placeholder="e.g. Are we growing within our customer base?" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
-    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Formula</label><input id="mf-formula" type="text" placeholder="e.g. (Numerator / Denominator) x 100" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:18px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">DRI</label><input id="mf-dri" type="text" placeholder="e.g. Jidesh M" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
       <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Type</label><select id="mf-type" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option>Leading</option><option>Lagging</option></select></div>
-      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">L2</label><input id="mf-l2" type="text" placeholder="e.g. 60-75%" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
-      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">L3</label><input id="mf-l3" type="text" placeholder="e.g. 75-85%" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
-      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">L4</label><input id="mf-l4" type="text" placeholder="e.g. >90%" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+    </div>
+    <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Exec question</label><input id="mf-question" type="text" placeholder="e.g. Are we growing existing revenue?" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+    <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Formula</label><input id="mf-formula" type="text" placeholder="e.g. (Numerator / Denominator) x 100" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px" style="margin-bottom:8px">Benchmarks by level <span style="font-size:10px;color:var(--teal-text);font-weight:500">(L4 = H2 2026 target)</span></label>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">
+        <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">L1</label><input id="mf-l1" type="text" style="width:100%;padding:6px 8px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface)"></div>
+        <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">L2</label><input id="mf-l2" type="text" style="width:100%;padding:6px 8px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface)"></div>
+        <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">L3</label><input id="mf-l3" type="text" style="width:100%;padding:6px 8px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface)"></div>
+        <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px" style="color:var(--teal-text)">L4 ★</label><input id="mf-l4" type="text" style="width:100%;padding:6px 8px;border-radius:var(--radius);border:1.5px solid var(--teal);font-size:12px;font-family:var(--font);background:var(--teal-bg)"></div>
+        <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">L5</label><input id="mf-l5" type="text" style="width:100%;padding:6px 8px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface)"></div>
+        <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px">L6</label><input id="mf-l6" type="text" style="width:100%;padding:6px 8px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface)"></div>
+      </div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="save-btn" onclick="closeMetricModal()">Cancel</button>
@@ -611,16 +623,20 @@ function renderMetrics() {
   document.getElementById('metrics-empty').style.display = list.length ? 'none' : 'block';
   document.getElementById('metrics-tbody-main').innerHTML = list.map(function(m) {
     var typeCls = m.type === 'Lagging' ? 'type-lagging' : 'type-leading';
-    var saved = metricTargets[m.id] || '';
+    var saved = metricTargets[m.id] || m.h2_target || '';
     return '<tr>'
       + '<td><div class="metric-name">'+escHtml(m.name)+'</div></td>'
-      + '<td><span style="font-size:11px;padding:2px 7px;border-radius:20px;background:var(--surface-alt);color:var(--text-secondary)">'+m.pillar+'</span></td>'
+      + '<td><span style="font-size:11px;padding:2px 7px;border-radius:20px;background:var(--surface-alt);color:var(--text-secondary)">'+escHtml(m.pillar)+'</span></td>'
+      + '<td style="font-size:12px;color:var(--text-secondary)">'+escHtml(m.dri||'')+'</td>'
       + '<td style="font-size:11px;color:var(--text-muted);line-height:1.4">'+escHtml(m.formula)+'</td>'
       + '<td><span class="type-badge '+typeCls+'">'+m.type+'</span></td>'
-      + '<td><span class="level-cell">'+m.l2+'</span></td>'
-      + '<td><span class="level-cell">'+m.l3+'</span></td>'
-      + '<td><span class="level-cell" style="background:var(--teal-bg);color:var(--teal-text)">'+m.l4+'</span></td>'
-      + '<td><input style="width:88px;padding:4px 7px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface)" value="'+escHtml(saved)+'" placeholder="'+m.l4+'" onchange="saveMetricTarget('+m.id+',this.value)"></td>'
+      + '<td><span class="level-cell">'+escHtml(m.l1||'')+'</span></td>'
+      + '<td><span class="level-cell">'+escHtml(m.l2||'')+'</span></td>'
+      + '<td><span class="level-cell">'+escHtml(m.l3||'')+'</span></td>'
+      + '<td><span class="level-cell" style="background:var(--teal-bg);color:var(--teal-text)">'+escHtml(m.l4||'')+'</span></td>'
+      + '<td><span class="level-cell">'+escHtml(m.l5||'')+'</span></td>'
+      + '<td><span class="level-cell">'+escHtml(m.l6||'')+'</span></td>'
+      + '<td><input style="width:84px;padding:4px 7px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface)" value="'+escHtml(saved)+'" placeholder="'+escHtml(m.l4||'')+'" onchange="saveMetricTarget('+m.id+',this.value)"></td>'
       + '<td style="white-space:nowrap;padding:8px 10px">'
       +   (pendingDeleteId === m.id
         ? '<span style="font-size:11px;color:var(--danger-text);margin-right:6px;font-weight:500">Delete?</span>'
@@ -643,16 +659,20 @@ function openMetricModal(id) {
     document.getElementById('modal-metric-id').value = id;
     document.getElementById('mf-name').value = m.name;
     document.getElementById('mf-pillar').value = m.pillar;
+    document.getElementById('mf-dri').value = m.dri||'';
     document.getElementById('mf-question').value = m.question;
     document.getElementById('mf-formula').value = m.formula;
     document.getElementById('mf-type').value = m.type;
+    document.getElementById('mf-l1').value = m.l1||'';
     document.getElementById('mf-l2').value = m.l2;
     document.getElementById('mf-l3').value = m.l3;
     document.getElementById('mf-l4').value = m.l4;
+    document.getElementById('mf-l5').value = m.l5||'';
+    document.getElementById('mf-l6').value = m.l6||'';
   } else {
     document.getElementById('modal-title').textContent = 'Add metric';
     document.getElementById('modal-metric-id').value = '';
-    ['mf-name','mf-question','mf-formula','mf-l2','mf-l3','mf-l4'].forEach(function(id) { document.getElementById(id).value = ''; });
+    ['mf-name','mf-dri','mf-question','mf-formula','mf-l1','mf-l2','mf-l3','mf-l4','mf-l5','mf-l6'].forEach(function(id) { document.getElementById(id).value = ''; });
     document.getElementById('mf-type').value = 'Leading';
     document.getElementById('mf-pillar').value = 'Onboarding';
   }
@@ -664,14 +684,18 @@ function saveMetricModal() {
   if (!name) { showToast('Metric name is required'); return; }
   var rawId = document.getElementById('modal-metric-id').value;
   var obj = {
-    pillar: document.getElementById('mf-pillar').value,
-    name: name,
-    question: document.getElementById('mf-question').value.trim(),
-    formula: document.getElementById('mf-formula').value.trim(),
-    type: document.getElementById('mf-type').value,
-    l2: document.getElementById('mf-l2').value.trim(),
-    l3: document.getElementById('mf-l3').value.trim(),
-    l4: document.getElementById('mf-l4').value.trim(),
+    pillar:    document.getElementById('mf-pillar').value,
+    name:      name,
+    dri:       document.getElementById('mf-dri').value.trim(),
+    question:  document.getElementById('mf-question').value.trim(),
+    formula:   document.getElementById('mf-formula').value.trim(),
+    type:      document.getElementById('mf-type').value,
+    l1:        document.getElementById('mf-l1').value.trim(),
+    l2:        document.getElementById('mf-l2').value.trim(),
+    l3:        document.getElementById('mf-l3').value.trim(),
+    l4:        document.getElementById('mf-l4').value.trim(),
+    l5:        document.getElementById('mf-l5').value.trim(),
+    l6:        document.getElementById('mf-l6').value.trim(),
   };
   if(rawId){apiPut('/metrics/'+rawId,obj).then(function(u){var i=METRICS.findIndex(function(x){return x.id===parseInt(rawId);});if(i>-1)METRICS[i]=u;closeMetricModal();renderMetrics();showToast('Metric updated');}).catch(function(e){showToast('Error: '+e.message);});} else {apiPost('/metrics',obj).then(function(c){METRICS.push(c);closeMetricModal();renderMetrics();showToast('Metric added');}).catch(function(e){showToast('Error: '+e.message);});}
 }
@@ -1040,11 +1064,11 @@ function showUploadStatus(elId, msg, isError) {
 // ── Metrics Template & Bulk Upload ───────────────────────────────────────────
 
 function downloadMetricsTemplate() {
-  var headers = 'Pillar,Metric Name,Exec Question,Formula,Type,L2 Benchmark,L3 Benchmark,L4 Benchmark,H2 Target';
+  var headers = 'Pillar,DRI,Metric Name,Exec Question,Formula,Type,L1 Benchmark,L2 Benchmark,L3 Benchmark,L4 Benchmark,L5 Benchmark,L6 Benchmark,H2 Target';
   var example = [
-    'Onboarding,On-Time Go-Live %,Are implementations completing on time?,(On-Time Go-Lives / Total Go-Lives) x 100,Lagging,60-75%,75-85%,85-92%,88%',
-    'Retention,NRR,Are we growing existing revenue?,"((Start ARR - Churn + Expansion) / Start ARR) x 100",Lagging,100-105%,105-110%,110-115%,108%',
-    'Support,CSAT,Are customers satisfied with support?,(Positive CSAT / Total Responses) x 100,Lagging,80-85%,85-88%,88-92%,90%',
+    'Onboarding,Jidesh M,On-Time Go-Live %,Are implementations completing on time?,(On-Time Go-Lives / Total Go-Lives) x 100,Lagging,<30%,60-75%,75-85%,85-92%,>92%,AI-driven,88%',
+    'Retention,Deepak V,NRR,Are we growing existing revenue?,"((Start ARR - Churn + Expansion) / Start ARR) x 100",Lagging,<95%,100-105%,105-110%,110-115%,>115%,>120%,108%',
+    'Support,Anirban M,CSAT,Are customers satisfied with support?,(Positive CSAT / Total Responses) x 100,Lagging,<75%,80-85%,85-88%,88-92%,>92%,>95%,90%',
   ].join('\n');
   var csv = headers + '\n' + example;
   downloadFile(csv, 'metrics_bulk_upload_template.csv', 'text/csv');
@@ -1070,13 +1094,17 @@ function bulkUploadMetrics(event) {
     var payload = valid.map(function(r) {
       return {
         pillar:    r['Pillar']         || '',
+        dri:       r['DRI']            || '',
         name:      r['Metric Name']    || '',
         question:  r['Exec Question']  || '',
         formula:   r['Formula']        || '',
         type:      r['Type'] === 'Lagging' ? 'Lagging' : 'Leading',
+        l1:        r['L1 Benchmark']   || '',
         l2:        r['L2 Benchmark']   || '',
         l3:        r['L3 Benchmark']   || '',
         l4:        r['L4 Benchmark']   || '',
+        l5:        r['L5 Benchmark']   || '',
+        l6:        r['L6 Benchmark']   || '',
         h2_target: r['H2 Target']      || '',
       };
     });

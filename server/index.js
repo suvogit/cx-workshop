@@ -20,12 +20,14 @@ async function initDB() {
       phase       INTEGER NOT NULL CHECK (phase BETWEEN 0 AND 5),
       text        TEXT NOT NULL,
       pillar      TEXT NOT NULL,
+      dri         TEXT DEFAULT '',
       people      TEXT DEFAULT '',
       due_date    DATE,
       comments    TEXT DEFAULT '',
       created_at  TIMESTAMPTZ DEFAULT NOW(),
       updated_at  TIMESTAMPTZ DEFAULT NOW()
     );
+    ALTER TABLE roadmap_items ADD COLUMN IF NOT EXISTS dri TEXT DEFAULT '';
     CREATE TABLE IF NOT EXISTS action_items (
       id          SERIAL PRIMARY KEY,
       detail      TEXT NOT NULL,
@@ -107,26 +109,26 @@ app.get('/api/roadmap', async (req, res) => {
 });
 
 app.post('/api/roadmap', async (req, res) => {
-  const { ws, phase, text, pillar, people, due, comments } = req.body;
+  const { ws, phase, text, pillar, dri, people, due, comments } = req.body;
   try {
     const { rows } = await pool.query(
-      `INSERT INTO roadmap_items (ws, phase, text, pillar, people, due_date, comments)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [ws, phase, text, pillar, people||'', due||null, comments||'']
+      `INSERT INTO roadmap_items (ws, phase, text, pillar, dri, people, due_date, comments)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [ws, phase, text, pillar, dri||'', people||'', due||null, comments||'']
     );
     res.status(201).json(dbToRoadmap(rows[0]));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.put('/api/roadmap/:id', async (req, res) => {
-  const { ws, phase, text, pillar, people, due, comments } = req.body;
+  const { ws, phase, text, pillar, dri, people, due, comments } = req.body;
   try {
     const { rows } = await pool.query(
       `UPDATE roadmap_items
-       SET ws=$1, phase=$2, text=$3, pillar=$4, people=$5,
-           due_date=$6, comments=$7, updated_at=NOW()
-       WHERE id=$8 RETURNING *`,
-      [ws, phase, text, pillar, people||'', due||null, comments||'', req.params.id]
+       SET ws=$1, phase=$2, text=$3, pillar=$4, dri=$5, people=$6,
+           due_date=$7, comments=$8, updated_at=NOW()
+       WHERE id=$9 RETURNING *`,
+      [ws, phase, text, pillar, dri||'', people||'', due||null, comments||'', req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
     res.json(dbToRoadmap(rows[0]));
@@ -147,6 +149,7 @@ function dbToRoadmap(r) {
     phase:    r.phase,
     text:     r.text,
     pillar:   r.pillar,
+    dri:      r.dri || '',
     people:   r.people || '',
     due:      r.due_date ? r.due_date.toISOString().slice(0,10) : '',
     comments: r.comments || '',
@@ -366,10 +369,10 @@ app.post('/api/roadmap/bulk', async (req, res) => {
     const created = [];
     for (const it of rows) {
       const { rows: r } = await client.query(
-        `INSERT INTO roadmap_items (ws, phase, text, pillar, people, due_date, comments)
-         VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+        `INSERT INTO roadmap_items (ws, phase, text, pillar, dri, people, due_date, comments)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
         [it.ws||'lifecycle', parseInt(it.phase)||0, it.text||'',
-         it.pillar||'Onboarding', it.people||'', it.due||null, it.comments||'']
+         it.pillar||'Onboarding', it.dri||'', it.people||'', it.due||null, it.comments||'']
       );
       created.push(dbToRoadmap(r[0]));
     }

@@ -219,7 +219,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
       <button class="save-btn" onclick="downloadRoadmapTemplate()" title="Download CSV template"><i class="ti ti-download" aria-hidden="true"></i> Template</button>
       <label class="save-btn" style="cursor:pointer;margin:0" title="Bulk upload CSV">
         <i class="ti ti-upload" aria-hidden="true"></i> Bulk upload
-        <input type="file" accept=".csv" onchange="bulkUploadRoadmap(event)" style="display:none">
+        <input type="file" accept=".xlsx,.csv" onchange="bulkUploadRoadmap(event)" style="display:none">
       </label>
       <select id="rm-filter-ws" onchange="renderRoadmap()" style="padding:6px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface);color:var(--text-primary)">
         <option value="all">All workstreams</option>
@@ -1274,52 +1274,188 @@ function bulkUploadMetrics(event) {
 var ROADMAP_UPLOAD_STATUS_ID = 'roadmap-upload-status';
 
 function downloadRoadmapTemplate() {
-  var headers = 'Workstream,Phase (1-6),Text,Pillar,People,Due Date (YYYY-MM-DD),Comments';
-  var example = [
-    'lifecycle,1,Customer health score rollout,Retention,Deepak V,2026-08-31,Critical for churn prevention',
-    'intel,2,Integrate Salesforce,Intelligence,Subhajit D,2026-09-15,Needs IT approval',
-    'ops,3,Executive escalation playbook,Escalation,Suvo,,',
-    'people,4,Manager coaching program,People,Divyatha,2026-10-01,',
-  ].join('\n');
-  var csv = headers + '\n' + example;
-  downloadFile(csv, 'roadmap_bulk_upload_template.csv', 'text/csv');
+  if (typeof XLSX === 'undefined') { showToast('Excel library still loading, try again in a moment'); return; }
+
+  var wb = XLSX.utils.book_new();
+  var ws = {};
+
+  var pillars    = ['Onboarding','Adoption','Success','Retention','Advocacy','Support','Intelligence','Technology','Escalation','People'];
+  var wsList     = ['1. Customer Lifecycle Excellence','2. Customer Intelligence & AI','3. Customer Operations Excellence','4. People Excellence'];
+  var wsValues   = ['lifecycle','intel','ops','people'];
+  var phaseList  = ['Month 1 - Standardize','Month 2 - Instrument','Month 3 - Predict','Month 4 - Automate','Month 5 - Optimize','Month 6 - Scale'];
+
+  // ── Headers ───────────────────────────────────────────────────────────────
+  var headers = ['Workstream','Phase','Activity / Item Text','Pillar','DRI','People to Work With','Due Date (YYYY-MM-DD)','Comments'];
+  var headerStyle = { font: { bold: true, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '1E4D6B' } }, alignment: { horizontal: 'center', wrapText: true } };
+  headers.forEach(function(h, ci) {
+    var addr = XLSX.utils.encode_cell({ r: 0, c: ci });
+    ws[addr] = { v: h, t: 's', s: headerStyle };
+  });
+
+  // ── Sample data row ───────────────────────────────────────────────────────
+  var sampleRow = [
+    '1. Customer Lifecycle Excellence',
+    'Month 1 - Standardize',
+    'Customer health score rollout',
+    'Retention',
+    'Deepak V',
+    'Jidesh M, Subhajit D',
+    '2026-08-31',
+    'Critical for churn prevention in Q3'
+  ];
+  var wsColStyle     = { fill: { fgColor: { rgb: 'E6F1FB' } }, alignment: { wrapText: true } };
+  var phaseColStyle  = { fill: { fgColor: { rgb: 'FAF0DA' } }, alignment: { wrapText: true } };
+  var pillarColStyle = { fill: { fgColor: { rgb: 'E1F5EE' } }, alignment: { wrapText: true } };
+  var dataStyle      = { alignment: { wrapText: true } };
+
+  sampleRow.forEach(function(val, ci) {
+    var addr  = XLSX.utils.encode_cell({ r: 1, c: ci });
+    var style = ci === 0 ? wsColStyle : ci === 1 ? phaseColStyle : ci === 3 ? pillarColStyle : dataStyle;
+    ws[addr]  = { v: val, t: 's', s: style };
+  });
+
+  ws['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: 51, c: headers.length - 1 } });
+
+  // ── Column widths ─────────────────────────────────────────────────────────
+  ws['!cols'] = [
+    { wch: 36 }, // Workstream
+    { wch: 24 }, // Phase
+    { wch: 36 }, // Text
+    { wch: 14 }, // Pillar
+    { wch: 14 }, // DRI
+    { wch: 22 }, // People
+    { wch: 18 }, // Due Date
+    { wch: 32 }, // Comments
+  ];
+
+  // ── Dropdowns ─────────────────────────────────────────────────────────────
+  ws['!dataValidation'] = [
+    {
+      sqref: 'A2:A51',
+      type: 'list',
+      formula1: '"' + wsList.join(',') + '"',
+      showDropDown: false,
+      showErrorMessage: true,
+      errorTitle: 'Invalid Workstream',
+      error: 'Please select a workstream from the list'
+    },
+    {
+      sqref: 'B2:B51',
+      type: 'list',
+      formula1: '"' + phaseList.join(',') + '"',
+      showDropDown: false,
+      showErrorMessage: true,
+      errorTitle: 'Invalid Phase',
+      error: 'Please select a phase from the list'
+    },
+    {
+      sqref: 'D2:D51',
+      type: 'list',
+      formula1: '"' + pillars.join(',') + '"',
+      showDropDown: false,
+      showErrorMessage: true,
+      errorTitle: 'Invalid Pillar',
+      error: 'Please select a pillar from the list'
+    }
+  ];
+
+  ws['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activePane: 'bottomLeft' };
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Roadmap Template');
+
+  // ── Instructions sheet ────────────────────────────────────────────────────
+  var instrData = [
+    ['CX Workshop — H2 Roadmap Bulk Upload Instructions'],
+    [''],
+    ['Column', 'Required?', 'Notes'],
+    ['Workstream', 'Required', 'Select from dropdown: 1. Customer Lifecycle Excellence / 2. Customer Intelligence & AI / 3. Customer Operations Excellence / 4. People Excellence'],
+    ['Phase', 'Required', 'Select from dropdown: Month 1 - Standardize through Month 6 - Scale'],
+    ['Activity / Item Text', 'Required', 'Short description of the activity card e.g. Customer health score rollout'],
+    ['Pillar', 'Optional', 'Select from dropdown: Onboarding, Adoption, Success, Retention, Advocacy, Support, Intelligence, Technology, Escalation, People'],
+    ['DRI', 'Optional', 'Single person directly responsible e.g. Jidesh M'],
+    ['People to Work With', 'Optional', 'Comma-separated collaborators e.g. Deepak V, Anirban M'],
+    ['Due Date (YYYY-MM-DD)', 'Optional', 'Format: 2026-08-31'],
+    ['Comments', 'Optional', 'Notes, dependencies, or risks'],
+    [''],
+    ['Tips',''],
+    ['- Fill data from row 2 onwards in the Roadmap Template sheet',''],
+    ['- Use the dropdowns for Workstream, Phase and Pillar columns',''],
+    ['- Do not modify the header row (row 1)',''],
+    ['- You can add up to 50 rows per upload',''],
+    ['- Save the file and upload using the Bulk Upload button on the H2 Roadmap page',''],
+  ];
+  var instrWs = XLSX.utils.aoa_to_sheet(instrData);
+  instrWs['!cols'] = [{ wch: 26 }, { wch: 12 }, { wch: 90 }];
+  instrWs['A1'].s = { font: { bold: true, sz: 14, color: { rgb: '1E4D6B' } } };
+  if (instrWs['A3']) instrWs['A3'].s = { font: { bold: true } };
+  if (instrWs['B3']) instrWs['B3'].s = { font: { bold: true } };
+  if (instrWs['C3']) instrWs['C3'].s = { font: { bold: true } };
+  XLSX.utils.book_append_sheet(wb, instrWs, 'Instructions');
+
+  XLSX.writeFile(wb, 'CX_Roadmap_Upload_Template.xlsx');
+  showToast('Roadmap template downloaded');
 }
 
 function bulkUploadRoadmap(event) {
   var file = event.target.files[0];
   if (!file) return;
+  var isXlsx = file.name.toLowerCase().endsWith('.xlsx');
   var reader = new FileReader();
   reader.onload = function(e) {
-    var rows = parseCSV(e.target.result);
+    var rows;
+    if (isXlsx) {
+      if (typeof XLSX === 'undefined') { showToast('Excel library not ready, try again'); return; }
+      var wb = XLSX.read(e.target.result, { type: 'array' });
+      var sheetName = wb.SheetNames.find(function(n) { return n !== 'Instructions'; }) || wb.SheetNames[0];
+      rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
+    } else {
+      rows = parseCSV(e.target.result);
+    }
     if (!rows.length) {
       showToast('No valid rows found in file');
       event.target.value = '';
       return;
     }
     var wsMap = {
-      'lifecycle': 'lifecycle', 'lifecycle excellence': 'lifecycle', '1': 'lifecycle',
-      'intel': 'intel', 'intelligence': 'intel', 'intelligence & ai': 'intel', '2': 'intel',
-      'ops': 'ops', 'operations': 'ops', 'operations excellence': 'ops', '3': 'ops',
-      'people': 'people', 'people excellence': 'people', '4': 'people'
+      'lifecycle': 'lifecycle', 'lifecycle excellence': 'lifecycle',
+      '1. customer lifecycle excellence': 'lifecycle', '1': 'lifecycle',
+      'intel': 'intel', 'intelligence': 'intel', 'intelligence & ai': 'intel',
+      '2. customer intelligence & ai': 'intel', '2': 'intel',
+      'ops': 'ops', 'operations': 'ops', 'operations excellence': 'ops',
+      '3. customer operations excellence': 'ops', '3': 'ops',
+      'people': 'people', 'people excellence': 'people',
+      '4. people excellence': 'people', '4': 'people'
     };
-    var valid = rows.filter(function(r) { return r['Text'] && r['Workstream']; });
+    var phaseMap = {
+      'month 1 - standardize': 0, 'month 1': 0, '1': 0,
+      'month 2 - instrument':  1, 'month 2': 1, '2': 1,
+      'month 3 - predict':     2, 'month 3': 2, '3': 2,
+      'month 4 - automate':    3, 'month 4': 3, '4': 3,
+      'month 5 - optimize':    4, 'month 5': 4, '5': 4,
+      'month 6 - scale':       5, 'month 6': 5, '6': 5,
+    };
+    var textKey = rows[0] ? (Object.keys(rows[0]).find(function(k){ return k === 'Activity / Item Text' || k === 'Text'; }) || 'Text') : 'Text';
+    var valid = rows.filter(function(r) { return (r[textKey]||r['Text']) && r['Workstream']; });
     if (!valid.length) {
       showToast('Rows must have at least Workstream and Text columns');
       event.target.value = '';
       return;
     }
     var payload = valid.map(function(r) {
-      var wsRaw = (r['Workstream'] || '').toLowerCase().trim();
-      var ws    = wsMap[wsRaw] || 'lifecycle';
-      var phase = Math.max(0, Math.min(5, parseInt(r['Phase (1-6)'] || r['Phase'] || '1') - 1));
+      var wsRaw    = (r['Workstream'] || '').toLowerCase().trim();
+      var ws       = wsMap[wsRaw] || 'lifecycle';
+      var phaseRaw = (r['Phase'] || r['Phase (1-6)'] || '').toLowerCase().trim();
+      var phase    = phaseMap[phaseRaw] !== undefined ? phaseMap[phaseRaw]
+                   : Math.max(0, Math.min(5, parseInt(phaseRaw || '1') - 1));
       return {
         ws:       ws,
         phase:    phase,
-        text:     r['Text']                      || '',
-        pillar:   r['Pillar']                    || 'Onboarding',
-        people:   r['People']                    || '',
-        due:      r['Due Date (YYYY-MM-DD)']     || r['Due Date'] || '',
-        comments: r['Comments']                  || '',
+        text:     r[textKey] || r['Text']           || '',
+        pillar:   r['Pillar']                        || 'Onboarding',
+        dri:      r['DRI']                           || '',
+        people:   r['People to Work With'] || r['People'] || '',
+        due:      r['Due Date (YYYY-MM-DD)'] || r['Due Date'] || '',
+        comments: r['Comments']                      || '',
       };
     });
     apiPost('/roadmap/bulk', payload)
@@ -1335,7 +1471,7 @@ function bulkUploadRoadmap(event) {
         event.target.value = '';
       });
   };
-  reader.readAsText(file);
+  if (isXlsx) { reader.readAsArrayBuffer(file); } else { reader.readAsText(file); }
 }
 
 // ── Generic file download helper ─────────────────────────────────────────────

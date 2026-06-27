@@ -351,8 +351,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
       <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Workstream</label><select id="rm-ws" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option value="lifecycle">1. Customer Lifecycle Excellence</option><option value="intel">2. Customer Intelligence &amp; AI</option><option value="ops">3. Customer Operations Excellence</option><option value="people">4. People Excellence</option></select></div>
     </div>
     <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Phase</label><select id="rm-phase" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option value="0">Month 1 - Standardize</option><option value="1">Month 2 - Instrument</option><option value="2">Month 3 - Predict</option><option value="3">Month 4 - Automate</option><option value="4">Month 5 - Optimize</option><option value="5">Month 6 - Scale</option></select></div>
+    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">DRI</label><input id="rm-dri" type="text" placeholder="e.g. Jidesh M" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">People to work with</label><input id="rm-people" type="text" placeholder="e.g. Jidesh M, Deepak V" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">People to work with</label><input id="rm-people" type="text" placeholder="e.g. Deepak V, Anirban M" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
       <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Expected due date</label><input id="rm-due" type="date" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"></div>
     </div>
     <div style="margin-bottom:18px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Comments</label><textarea id="rm-comments" rows="3" placeholder="Notes, dependencies, risks..." style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);resize:vertical;line-height:1.5"></textarea></div>
@@ -747,7 +748,8 @@ function renderRoadmap() {
             +   '</div>'
             + '</div>'
             + pillarChip(it.pillar)
-            + (it.people ? '<div style="font-size:9px;color:'+fg+';opacity:0.85;margin-top:4px">&#128100; '+escHtml(it.people)+'</div>' : '')
+            + (it.dri ? '<div style="font-size:9px;color:'+fg+';opacity:0.9;margin-top:4px;font-weight:500">&#127775; DRI: '+escHtml(it.dri)+'</div>' : '')
+            + (it.people ? '<div style="font-size:9px;color:'+fg+';opacity:0.85;margin-top:2px">&#128100; '+escHtml(it.people)+'</div>' : '')
             + (dueFmt ? '<div style="font-size:9px;color:'+fg+';opacity:0.85;margin-top:2px">&#128197; '+dueFmt+'</div>' : '')
             + (it.comments ? '<div style="font-size:9px;color:'+fg+';opacity:0.75;margin-top:3px;font-style:italic;border-top:1px solid rgba(0,0,0,0.08);padding-top:3px">'+escHtml(it.comments)+'</div>' : '')
             + '</div>';
@@ -776,6 +778,7 @@ function openRmModal(ws, phase, itemId) {
     document.getElementById('rm-pillar').value  = it.pillar;
     document.getElementById('rm-ws').value      = it.ws;
     document.getElementById('rm-phase').value   = String(it.phase);
+    document.getElementById('rm-dri').value     = it.dri || '';
     document.getElementById('rm-people').value  = it.people || '';
     document.getElementById('rm-due').value     = it.due || '';
     document.getElementById('rm-comments').value = it.comments || '';
@@ -785,6 +788,7 @@ function openRmModal(ws, phase, itemId) {
     document.getElementById('rm-pillar').value  = 'Onboarding';
     document.getElementById('rm-ws').value      = ws;
     document.getElementById('rm-phase').value   = String(phase);
+    document.getElementById('rm-dri').value     = '';
     document.getElementById('rm-people').value  = '';
     document.getElementById('rm-due').value     = '';
     document.getElementById('rm-comments').value = '';
@@ -799,6 +803,7 @@ function saveRmItem() {
   var ws      = document.getElementById('rm-ws').value;
   var phase   = parseInt(document.getElementById('rm-phase').value);
   var pillar  = document.getElementById('rm-pillar').value;
+  var dri     = document.getElementById('rm-dri').value.trim();
   var people  = document.getElementById('rm-people').value.trim();
   var due     = document.getElementById('rm-due').value;
   var comments = document.getElementById('rm-comments').value.trim();

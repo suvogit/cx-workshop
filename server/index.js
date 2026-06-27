@@ -310,6 +310,65 @@ app.put('/api/notes/:section', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+
+// ── Bulk insert: Metrics ──────────────────────────────────────────────────────
+app.post('/api/metrics/bulk', async (req, res) => {
+  const rows = req.body;
+  if (!Array.isArray(rows) || !rows.length) {
+    return res.status(400).json({ error: 'Expected array of metrics' });
+  }
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const created = [];
+    for (const m of rows) {
+      const { rows: r } = await client.query(
+        `INSERT INTO metrics (pillar, name, question, formula, type, l2, l3, l4, h2_target)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+        [m.pillar||'', m.name||'', m.question||'', m.formula||'',
+         m.type||'Leading', m.l2||'', m.l3||'', m.l4||'', m.h2_target||'']
+      );
+      created.push(dbToMetric(r[0]));
+    }
+    await client.query('COMMIT');
+    res.status(201).json({ inserted: created.length, items: created });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// ── Bulk insert: Roadmap Items ────────────────────────────────────────────────
+app.post('/api/roadmap/bulk', async (req, res) => {
+  const rows = req.body;
+  if (!Array.isArray(rows) || !rows.length) {
+    return res.status(400).json({ error: 'Expected array of roadmap items' });
+  }
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const created = [];
+    for (const it of rows) {
+      const { rows: r } = await client.query(
+        `INSERT INTO roadmap_items (ws, phase, text, pillar, people, due_date, comments)
+         VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+        [it.ws||'lifecycle', parseInt(it.phase)||0, it.text||'',
+         it.pillar||'Onboarding', it.people||'', it.due||null, it.comments||'']
+      );
+      created.push(dbToRoadmap(r[0]));
+    }
+    await client.query('COMMIT');
+    res.status(201).json({ inserted: created.length, items: created });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
 // ── Catch-all: serve frontend ─────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));

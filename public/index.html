@@ -121,6 +121,175 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
     </div>
   </div>
 </nav>
+
+<main class="main">
+<div class="page-header">
+  <h1 id="section-title">Diagnose &middot; Maturity Assessment</h1>
+  <p id="section-desc">Review maturity levels, evidence and confidence across all 10 CX pillars</p>
+</div>
+<div class="page-content">
+
+<!-- MATURITY ASSESSMENT -->
+<div id="section-maturity" class="section active">
+  <div class="grid-4" style="margin-bottom:20px">
+    <div class="kpi-card"><div class="kpi-label">Avg maturity level</div><div class="kpi-value">1.7</div><div class="kpi-sub">Target: L4 by Dec 2026</div></div>
+    <div class="kpi-card"><div class="kpi-label">Critical pillars</div><div class="kpi-value" style="color:var(--danger)">4</div><div class="kpi-sub">Escalation, Intel, Retention, Tech</div></div>
+    <div class="kpi-card"><div class="kpi-label">High confidence</div><div class="kpi-value" style="color:var(--success)">3</div><div class="kpi-sub">Onboarding, Support, Advocacy</div></div>
+    <div class="kpi-card"><div class="kpi-label">At L1 &mdash; Reactive</div><div class="kpi-value" style="color:var(--warning)">3</div><div class="kpi-sub">Adoption, Escalation, People</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-chart-radar" aria-hidden="true"></i> Current maturity by pillar</div>
+    <div class="card-subtitle">Each card shows current level, target, evidence, and confidence.</div>
+    <div id="pillar-grid"></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Maturity distribution</div>
+    <div style="position:relative;height:260px"><canvas id="maturityChart"></canvas></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-title"><i class="ti ti-list" aria-hidden="true"></i> CX maturity level reference</div>
+    <table style="width:100%;border-collapse:collapse;margin-top:4px">
+      <thead><tr>
+        <th style="text-align:left;padding:8px 12px;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);width:72px">Level</th>
+        <th style="text-align:left;padding:8px 12px;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);width:120px">Name</th>
+        <th style="text-align:left;padding:8px 12px;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong)">Description</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:10px 12px;border-bottom:0.5px solid var(--border)"><span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:#1e4d6b;color:#fff;font-size:13px;font-weight:600">L1</span></td><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:13px;font-weight:600;color:#c0392b">Reactive</td><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text-secondary)">Ad hoc, isolated responses focused on immediate issues</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:0.5px solid var(--border)"><span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:#1e4d6b;color:#fff;font-size:13px;font-weight:600">L2</span></td><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:13px;font-weight:600;color:#c0392b">Managed</td><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text-secondary)">Established repeatable processes with governance frameworks</td></tr>
+        <tr><td style="padding:10px 12px;border-bottom:0.5px solid var(--border)"><span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:#1e4d6b;color:#fff;font-size:13px;font-weight:600">L3</span></td><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:13px;font-weight:600;color:#c0392b">Standardized</td><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text-secondary)">Defined segmented customer journeys supported by playbooks</td></tr>
+        <tr style="background:var(--warning-bg)"><td style="padding:10px 12px;border-bottom:0.5px solid var(--border)"><span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:#1e4d6b;color:#fff;font-size:13px;font-weight:600;outline:2px solid #c0392b;outline-offset:2px">L4</span></td><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:13px;font-weight:600;color:#c0392b">Predictive</td><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text-secondary)">Utilizing data analytics for insights and forecasting <span style="margin-left:8px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:#f59e0b;color:#fff">H2 2026 Target</span></td></tr>
+        <tr style="opacity:0.7"><td style="padding:10px 12px;border-bottom:0.5px solid var(--border)"><span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:#1e4d6b;color:#fff;font-size:13px;font-weight:600">L5</span></td><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:13px;font-weight:600;color:#c0392b">Strategic</td><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text-secondary)">Customer operating model driven by outcomes</td></tr>
+        <tr style="opacity:0.5"><td style="padding:10px 12px"><span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:#1e4d6b;color:#fff;font-size:13px;font-weight:600">L6</span></td><td style="padding:10px 12px;font-size:13px;font-weight:600;color:#c0392b">Autonomous</td><td style="padding:10px 12px;font-size:13px;color:var(--text-secondary)">Customer operations orchestrated through AI automation</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- METRICS & TARGETS -->
+<div id="section-metrics" class="section">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="inner-tabs" style="margin-bottom:0;border-bottom:none">
+      <button class="inner-tab active" onclick="setMetricFilter('all')">All</button>
+      <button class="inner-tab" onclick="setMetricFilter('Onboarding')">Onboarding</button>
+      <button class="inner-tab" onclick="setMetricFilter('Adoption')">Adoption</button>
+      <button class="inner-tab" onclick="setMetricFilter('Retention')">Retention</button>
+      <button class="inner-tab" onclick="setMetricFilter('Support')">Support</button>
+      <button class="inner-tab" onclick="setMetricFilter('other')">Others</button>
+    </div>
+    <button class="save-btn primary" onclick="openMetricModal()"><i class="ti ti-plus" aria-hidden="true"></i> Add metric</button>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto">
+      <table class="metrics-table" style="min-width:900px">
+        <thead><tr>
+          <th style="width:160px">Metric</th><th style="width:120px">Pillar</th>
+          <th style="width:200px">Formula</th><th style="width:70px">Type</th>
+          <th style="width:72px">L2</th><th style="width:72px">L3</th>
+          <th style="width:80px">L4 benchmark</th><th style="width:96px">H2 target</th>
+          <th style="width:110px">Actions</th>
+        </tr></thead>
+        <tbody id="metrics-tbody-main"></tbody>
+      </table>
+    </div>
+  </div>
+  <p id="metrics-empty" style="display:none;font-size:13px;color:var(--text-muted);padding:20px 0;text-align:center">No metrics match this filter.</p>
+</div>
+
+<!-- H2 ROADMAP -->
+<div id="section-roadmap" class="section">
+  <div class="card" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div>
+      <div class="card-title" style="margin-bottom:2px"><i class="ti ti-road" aria-hidden="true"></i> 6-month roadmap to L4</div>
+      <div class="card-subtitle" style="margin-bottom:0">Click any cell to add items. Each item maps to a pillar.</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="rm-filter-ws" onchange="renderRoadmap()" style="padding:6px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface);color:var(--text-primary)">
+        <option value="all">All workstreams</option>
+        <option value="lifecycle">Lifecycle Excellence</option>
+        <option value="intel">Intelligence &amp; AI</option>
+        <option value="ops">Operations Excellence</option>
+        <option value="people">People Excellence</option>
+      </select>
+      <select id="rm-filter-pillar" onchange="renderRoadmap()" style="padding:6px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface);color:var(--text-primary)">
+        <option value="all">All pillars</option>
+        <option>Onboarding</option><option>Adoption</option><option>Success</option><option>Retention</option>
+        <option>Advocacy</option><option>Support</option><option>Intelligence</option><option>Technology</option>
+        <option>Escalation</option><option>People</option>
+      </select>
+    </div>
+  </div>
+  <div style="overflow-x:auto"><div id="roadmap-grid"></div></div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-title"><i class="ti ti-message" aria-hidden="true"></i> Workstream comments</div>
+    <div id="ws-comments"></div>
+  </div>
+</div>
+
+<!-- WORKSTREAM WISE PLAN -->
+<div id="section-owners" class="section">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+    <div>
+      <h2 style="font-size:15px;font-weight:500;margin-bottom:2px">Workstream wise plan</h2>
+      <p style="font-size:13px;color:var(--text-muted)">Auto-updated from H2 Roadmap. Edit DRI per pillar inline.</p>
+    </div>
+    <select id="ow-filter-pillar" onchange="renderOwners()" style="padding:6px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface);color:var(--text-primary)">
+      <option value="all">All pillars</option>
+      <option>Onboarding</option><option>Adoption</option><option>Success</option><option>Retention</option>
+      <option>Advocacy</option><option>Support</option><option>Intelligence</option><option>Technology</option>
+      <option>Escalation</option><option>People</option>
+    </select>
+  </div>
+  <div style="overflow-x:auto"><div id="owners-grid"></div></div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-title"><i class="ti ti-chart-donut" aria-hidden="true"></i> Items by owner</div>
+    <div style="position:relative;height:260px"><canvas id="ownerChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ACTION ITEM TRACKER -->
+<div id="section-actions" class="section">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+    <div>
+      <h2 style="font-size:15px;font-weight:500;margin-bottom:2px">Action Item Tracker</h2>
+      <p style="font-size:13px;color:var(--text-muted)">Track all action items. Add, edit, or mark items complete.</p>
+    </div>
+    <button class="save-btn primary" onclick="openActionModal()"><i class="ti ti-plus" aria-hidden="true"></i> Add action item</button>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px" id="action-summary-chips"></div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto">
+      <table class="metrics-table" style="min-width:820px">
+        <thead><tr>
+          <th style="width:36px">#</th><th style="min-width:220px">Item details</th>
+          <th style="width:130px">Owner</th><th style="width:120px">Expected closure</th>
+          <th style="width:90px">Status</th><th style="min-width:180px">Comments</th>
+          <th style="width:110px">Actions</th>
+        </tr></thead>
+        <tbody id="actions-tbody"></tbody>
+      </table>
+    </div>
+    <p id="actions-empty" style="display:none;font-size:13px;color:var(--text-muted);padding:24px;text-align:center">No action items yet. Click "Add action item" to get started.</p>
+  </div>
+</div>
+
+<!-- WORKSHOP NOTES -->
+<div id="section-notes" class="section">
+  <div class="grid-2" style="gap:16px">
+    <div>
+      <div class="card"><div class="card-title"><i class="ti ti-notes" aria-hidden="true"></i> Day 1 notes</div><textarea class="notes-area" id="notes-day1" placeholder="Key observations from Day 1..." style="min-height:160px"></textarea></div>
+      <div class="card" style="margin-top:16px"><div class="card-title"><i class="ti ti-notes" aria-hidden="true"></i> Day 2 notes</div><textarea class="notes-area" id="notes-day2" placeholder="Planning discussions from Day 2..." style="min-height:160px"></textarea></div>
+    </div>
+    <div>
+      <div class="card"><div class="card-title"><i class="ti ti-notes" aria-hidden="true"></i> Day 3 notes</div><textarea class="notes-area" id="notes-day3" placeholder="Commitment discussions from Day 3..." style="min-height:160px"></textarea></div>
+      <div class="card" style="margin-top:16px"><div class="card-title"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Parking lot</div><textarea class="notes-area" id="notes-parking" placeholder="Topics needing follow-up..." style="min-height:160px"></textarea></div>
+    </div>
+  </div>
+  <div style="margin-top:12px"><button class="save-btn primary" onclick="saveNotes()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Save notes</button></div>
+</div>
+
+</div><!-- /page-content -->
+</main>
 <!-- Metric modal -->
 <div id="metric-modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center">
   <div style="background:var(--surface);border-radius:12px;border:0.5px solid var(--border-strong);padding:24px 28px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto">

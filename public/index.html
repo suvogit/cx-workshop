@@ -6,6 +6,7 @@
 <title>CX Leadership Workshop — H2 2026</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg:#f7f6f3;--surface:#ffffff;--surface-alt:#f2f1ee;
@@ -181,7 +182,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
       <button class="save-btn" onclick="downloadMetricsTemplate()" title="Download CSV template"><i class="ti ti-download" aria-hidden="true"></i> Template</button>
       <label class="save-btn" style="cursor:pointer;margin:0" title="Bulk upload CSV">
         <i class="ti ti-upload" aria-hidden="true"></i> Bulk upload
-        <input type="file" accept=".csv" onchange="bulkUploadMetrics(event)" style="display:none">
+        <input type="file" accept=".xlsx,.csv" onchange="bulkUploadMetrics(event)" style="display:none">
       </label>
       <button class="save-btn primary" onclick="openMetricModal()"><i class="ti ti-plus" aria-hidden="true"></i> Add metric</button>
     </div>
@@ -1064,22 +1065,161 @@ function showUploadStatus(elId, msg, isError) {
 // ── Metrics Template & Bulk Upload ───────────────────────────────────────────
 
 function downloadMetricsTemplate() {
-  var headers = 'Pillar,DRI,Metric Name,Exec Question,Formula,Type,L1 Benchmark,L2 Benchmark,L3 Benchmark,L4 Benchmark,L5 Benchmark,L6 Benchmark,H2 Target';
-  var example = [
-    'Onboarding,Jidesh M,On-Time Go-Live %,Are implementations completing on time?,(On-Time Go-Lives / Total Go-Lives) x 100,Lagging,<30%,60-75%,75-85%,85-92%,>92%,AI-driven,88%',
-    'Retention,Deepak V,NRR,Are we growing existing revenue?,"((Start ARR - Churn + Expansion) / Start ARR) x 100",Lagging,<95%,100-105%,105-110%,110-115%,>115%,>120%,108%',
-    'Support,Anirban M,CSAT,Are customers satisfied with support?,(Positive CSAT / Total Responses) x 100,Lagging,<75%,80-85%,85-88%,88-92%,>92%,>95%,90%',
-  ].join('\n');
-  var csv = headers + '\n' + example;
-  downloadFile(csv, 'metrics_bulk_upload_template.csv', 'text/csv');
+  if (typeof XLSX === 'undefined') { showToast('Excel library still loading, try again in a moment'); return; }
+
+  var wb = XLSX.utils.book_new();
+  var ws = {};
+  var pillars = ['Onboarding','Adoption','Success','Retention','Advocacy','Support','Intelligence','Technology','Escalation','People'];
+  var types   = ['Leading','Lagging'];
+
+  // ── Column headers ────────────────────────────────────────────────────────
+  var headers = ['Pillar','DRI','Metric Name','Exec Question','Formula','Type',
+                 'L1 Benchmark','L2 Benchmark','L3 Benchmark','L4 Benchmark',
+                 'L5 Benchmark','L6 Benchmark','H2 Target'];
+
+  // ── Header row styling ────────────────────────────────────────────────────
+  var headerStyle = {
+    font:      { bold: true, color: { rgb: 'FFFFFF' } },
+    fill:      { fgColor: { rgb: '1E4D6B' } },
+    alignment: { horizontal: 'center', wrapText: true },
+    border:    { bottom: { style: 'thin', color: { rgb: 'AAAAAA' } } }
+  };
+  var l4Style = {
+    font:      { bold: true, color: { rgb: 'FFFFFF' } },
+    fill:      { fgColor: { rgb: '1D9E75' } },
+    alignment: { horizontal: 'center', wrapText: true }
+  };
+
+  headers.forEach(function(h, ci) {
+    var addr = XLSX.utils.encode_cell({ r: 0, c: ci });
+    ws[addr] = { v: h, t: 's', s: h === 'L4 Benchmark' ? l4Style : headerStyle };
+  });
+
+  // ── Sample data row ───────────────────────────────────────────────────────
+  var sampleRow = [
+    'Onboarding',          // Pillar (will have dropdown)
+    'Jidesh M',            // DRI
+    'On-Time Go-Live %',   // Metric Name
+    'Are implementations completing on time?',
+    '(On-Time Go-Lives / Total Go-Lives) x 100',
+    'Lagging',             // Type (will have dropdown)
+    '<30%','60-75%','75-85%','85-92%','>92%','AI-driven','88%'
+  ];
+
+  var dataStyle = { alignment: { wrapText: true } };
+  var pillarStyle = { fill: { fgColor: { rgb: 'E6F1FB' } }, alignment: { wrapText: true } };
+  var typeStyle   = { fill: { fgColor: { rgb: 'FAF0DA' } }, alignment: { wrapText: true } };
+  var l4DataStyle = { fill: { fgColor: { rgb: 'E1F5EE' } }, font: { bold: true } };
+
+  sampleRow.forEach(function(val, ci) {
+    var addr = XLSX.utils.encode_cell({ r: 1, c: ci });
+    var style = ci === 0 ? pillarStyle : ci === 5 ? typeStyle : ci === 9 ? l4DataStyle : dataStyle;
+    ws[addr] = { v: val, t: 's', s: style };
+  });
+
+  ws['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: 50, c: headers.length - 1 } });
+
+  // ── Column widths ─────────────────────────────────────────────────────────
+  ws['!cols'] = [
+    { wch: 14 }, // Pillar
+    { wch: 14 }, // DRI
+    { wch: 26 }, // Metric Name
+    { wch: 38 }, // Exec Question
+    { wch: 42 }, // Formula
+    { wch: 10 }, // Type
+    { wch: 12 }, // L1
+    { wch: 12 }, // L2
+    { wch: 12 }, // L3
+    { wch: 12 }, // L4
+    { wch: 12 }, // L5
+    { wch: 12 }, // L6
+    { wch: 12 }, // H2 Target
+  ];
+
+  // ── Dropdown validations ──────────────────────────────────────────────────
+  ws['!dataValidation'] = [
+    {
+      // Pillar dropdown: column A rows 2-51
+      sqref: 'A2:A51',
+      type: 'list',
+      formula1: '"' + pillars.join(',') + '"',
+      showDropDown: false,
+      showErrorMessage: true,
+      errorTitle: 'Invalid Pillar',
+      error: 'Please select from the list: ' + pillars.join(', ')
+    },
+    {
+      // Type dropdown: column F rows 2-51
+      sqref: 'F2:F51',
+      type: 'list',
+      formula1: '"Leading,Lagging"',
+      showDropDown: false,
+      showErrorMessage: true,
+      errorTitle: 'Invalid Type',
+      error: 'Please select Leading or Lagging'
+    }
+  ];
+
+  // ── Freeze top row ────────────────────────────────────────────────────────
+  ws['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activePane: 'bottomLeft' };
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Metrics Template');
+
+  // ── Instructions sheet ────────────────────────────────────────────────────
+  var instrData = [
+    ['CX Workshop — Metrics Bulk Upload Instructions'],
+    [''],
+    ['Column', 'Required?', 'Notes'],
+    ['Pillar', 'Required', 'Select from dropdown: Onboarding, Adoption, Success, Retention, Advocacy, Support, Intelligence, Technology, Escalation, People'],
+    ['DRI', 'Optional', 'Name of the person responsible e.g. Jidesh M'],
+    ['Metric Name', 'Required', 'Short name for the metric e.g. NRR, CSAT, On-Time Go-Live %'],
+    ['Exec Question', 'Optional', 'The question this metric answers e.g. Are we growing existing revenue?'],
+    ['Formula', 'Optional', 'How the metric is calculated e.g. (Numerator / Denominator) x 100'],
+    ['Type', 'Optional', 'Select from dropdown: Leading or Lagging'],
+    ['L1 Benchmark', 'Optional', 'Benchmark at Reactive level'],
+    ['L2 Benchmark', 'Optional', 'Benchmark at Managed level'],
+    ['L3 Benchmark', 'Optional', 'Benchmark at Standardized level'],
+    ['L4 Benchmark', 'Optional', 'Benchmark at Predictive level — H2 2026 TARGET'],
+    ['L5 Benchmark', 'Optional', 'Benchmark at Strategic level'],
+    ['L6 Benchmark', 'Optional', 'Benchmark at Autonomous level'],
+    ['H2 Target', 'Optional', 'Your specific H2 2026 target value e.g. 88%'],
+    [''],
+    ['Tips', ''],
+    ['- Fill data from row 2 onwards in the Metrics Template sheet', ''],
+    ['- Do not modify the header row (row 1)', ''],
+    ['- Use the dropdowns in Pillar and Type columns', ''],
+    ['- You can add up to 50 rows per upload', ''],
+    ['- Save the file and upload it using the Bulk Upload button in the app', ''],
+  ];
+  var instrWs = XLSX.utils.aoa_to_sheet(instrData);
+  instrWs['!cols'] = [{ wch: 20 }, { wch: 12 }, { wch: 80 }];
+  // Bold the title and column headers
+  instrWs['A1'].s = { font: { bold: true, sz: 14, color: { rgb: '1E4D6B' } } };
+  instrWs['A3'].s = { font: { bold: true } };
+  instrWs['B3'].s = { font: { bold: true } };
+  instrWs['C3'].s = { font: { bold: true } };
+  XLSX.utils.book_append_sheet(wb, instrWs, 'Instructions');
+
+  XLSX.writeFile(wb, 'CX_Metrics_Upload_Template.xlsx');
+  showToast('Template downloaded');
 }
 
 function bulkUploadMetrics(event) {
   var file = event.target.files[0];
   if (!file) return;
+  var isXlsx = file.name.toLowerCase().endsWith('.xlsx');
   var reader = new FileReader();
   reader.onload = function(e) {
-    var rows = parseCSV(e.target.result);
+    var rows;
+    if (isXlsx) {
+      if (typeof XLSX === 'undefined') { showUploadStatus('metrics-upload-status','Excel library not ready',true); return; }
+      var wb = XLSX.read(e.target.result, { type: 'array' });
+      // Use first sheet that contains data rows
+      var sheetName = wb.SheetNames.find(function(n) { return n !== 'Instructions'; }) || wb.SheetNames[0];
+      rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
+    } else {
+      rows = parseCSV(e.target.result);
+    }
     if (!rows.length) {
       showUploadStatus('metrics-upload-status', 'No valid rows found in file', true);
       event.target.value = '';
@@ -1121,7 +1261,7 @@ function bulkUploadMetrics(event) {
         event.target.value = '';
       });
   };
-  reader.readAsText(file);
+  if (isXlsx) { reader.readAsArrayBuffer(file); } else { reader.readAsText(file); }
 }
 
 // ── Roadmap Template & Bulk Upload ───────────────────────────────────────────

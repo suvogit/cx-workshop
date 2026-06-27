@@ -168,7 +168,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
 
 <!-- METRICS & TARGETS -->
 <div id="section-metrics" class="section">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
     <div class="inner-tabs" style="margin-bottom:0;border-bottom:none">
       <button class="inner-tab active" onclick="setMetricFilter('all')">All</button>
       <button class="inner-tab" onclick="setMetricFilter('Onboarding')">Onboarding</button>
@@ -177,8 +177,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
       <button class="inner-tab" onclick="setMetricFilter('Support')">Support</button>
       <button class="inner-tab" onclick="setMetricFilter('other')">Others</button>
     </div>
-    <button class="save-btn primary" onclick="openMetricModal()"><i class="ti ti-plus" aria-hidden="true"></i> Add metric</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="save-btn" onclick="downloadMetricsTemplate()" title="Download CSV template"><i class="ti ti-download" aria-hidden="true"></i> Template</button>
+      <label class="save-btn" style="cursor:pointer;margin:0" title="Bulk upload CSV">
+        <i class="ti ti-upload" aria-hidden="true"></i> Bulk upload
+        <input type="file" accept=".csv" onchange="bulkUploadMetrics(event)" style="display:none">
+      </label>
+      <button class="save-btn primary" onclick="openMetricModal()"><i class="ti ti-plus" aria-hidden="true"></i> Add metric</button>
+    </div>
   </div>
+  <div id="metrics-upload-status" style="display:none;margin-bottom:12px;padding:8px 14px;border-radius:var(--radius);font-size:13px"></div>
   <div class="card" style="padding:0;overflow:hidden">
     <div style="overflow-x:auto">
       <table class="metrics-table" style="min-width:900px">
@@ -204,6 +212,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font
       <div class="card-subtitle" style="margin-bottom:0">Click any cell to add items. Each item maps to a pillar.</div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="save-btn" onclick="downloadRoadmapTemplate()" title="Download CSV template"><i class="ti ti-download" aria-hidden="true"></i> Template</button>
+      <label class="save-btn" style="cursor:pointer;margin:0" title="Bulk upload CSV">
+        <i class="ti ti-upload" aria-hidden="true"></i> Bulk upload
+        <input type="file" accept=".csv" onchange="bulkUploadRoadmap(event)" style="display:none">
+      </label>
       <select id="rm-filter-ws" onchange="renderRoadmap()" style="padding:6px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface);color:var(--text-primary)">
         <option value="all">All workstreams</option>
         <option value="lifecycle">Lifecycle Excellence</option>
@@ -989,6 +1002,181 @@ function switchInnerTab(section, tab) {
 
 // ── Notes ─────────────────────────────────────────────────────────────────────
 function saveNotes() { showToast('Notes saved'); completedSections.add('notes'); updateProgress(); }
+
+
+// ── Bulk Upload Helpers ───────────────────────────────────────────────────────
+
+function parseCSV(text) {
+  var lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  var headers = lines[0].split(',').map(function(h) { return h.trim().replace(/^"|"$/g,''); });
+  return lines.slice(1).map(function(line) {
+    // Handle quoted fields with commas inside
+    var fields = [];
+    var cur = '', inQuote = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') { inQuote = !inQuote; }
+      else if (ch === ',' && !inQuote) { fields.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    fields.push(cur.trim());
+    var obj = {};
+    headers.forEach(function(h, i) { obj[h] = (fields[i] || '').replace(/^"|"$/g,''); });
+    return obj;
+  }).filter(function(row) { return Object.values(row).some(function(v) { return v; }); });
+}
+
+function showUploadStatus(elId, msg, isError) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  el.style.display = 'block';
+  el.style.background = isError ? 'var(--danger-bg)' : 'var(--success-bg)';
+  el.style.color = isError ? 'var(--danger-text)' : 'var(--success-text)';
+  el.textContent = msg;
+  setTimeout(function() { el.style.display = 'none'; }, 5000);
+}
+
+// ── Metrics Template & Bulk Upload ───────────────────────────────────────────
+
+function downloadMetricsTemplate() {
+  var headers = 'Pillar,Metric Name,Exec Question,Formula,Type,L2 Benchmark,L3 Benchmark,L4 Benchmark,H2 Target';
+  var example = [
+    'Onboarding,On-Time Go-Live %,Are implementations completing on time?,(On-Time Go-Lives / Total Go-Lives) x 100,Lagging,60-75%,75-85%,85-92%,88%',
+    'Retention,NRR,Are we growing existing revenue?,"((Start ARR - Churn + Expansion) / Start ARR) x 100",Lagging,100-105%,105-110%,110-115%,108%',
+    'Support,CSAT,Are customers satisfied with support?,(Positive CSAT / Total Responses) x 100,Lagging,80-85%,85-88%,88-92%,90%',
+  ].join('\n');
+  var csv = headers + '\n' + example;
+  downloadFile(csv, 'metrics_bulk_upload_template.csv', 'text/csv');
+}
+
+function bulkUploadMetrics(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var rows = parseCSV(e.target.result);
+    if (!rows.length) {
+      showUploadStatus('metrics-upload-status', 'No valid rows found in file', true);
+      event.target.value = '';
+      return;
+    }
+    var valid = rows.filter(function(r) { return r['Metric Name'] && r['Pillar']; });
+    if (!valid.length) {
+      showUploadStatus('metrics-upload-status', 'Rows must have at least Pillar and Metric Name columns', true);
+      event.target.value = '';
+      return;
+    }
+    var payload = valid.map(function(r) {
+      return {
+        pillar:    r['Pillar']         || '',
+        name:      r['Metric Name']    || '',
+        question:  r['Exec Question']  || '',
+        formula:   r['Formula']        || '',
+        type:      r['Type'] === 'Lagging' ? 'Lagging' : 'Leading',
+        l2:        r['L2 Benchmark']   || '',
+        l3:        r['L3 Benchmark']   || '',
+        l4:        r['L4 Benchmark']   || '',
+        h2_target: r['H2 Target']      || '',
+      };
+    });
+    apiPost('/metrics/bulk', payload)
+      .then(function(result) {
+        result.items.forEach(function(m) { METRICS.push(m); });
+        renderMetrics();
+        showUploadStatus('metrics-upload-status', '✓ ' + result.inserted + ' metric(s) added successfully', false);
+        showToast(result.inserted + ' metrics uploaded');
+        event.target.value = '';
+      })
+      .catch(function(err) {
+        showUploadStatus('metrics-upload-status', 'Upload failed: ' + err.message, true);
+        event.target.value = '';
+      });
+  };
+  reader.readAsText(file);
+}
+
+// ── Roadmap Template & Bulk Upload ───────────────────────────────────────────
+
+var ROADMAP_UPLOAD_STATUS_ID = 'roadmap-upload-status';
+
+function downloadRoadmapTemplate() {
+  var headers = 'Workstream,Phase (1-6),Text,Pillar,People,Due Date (YYYY-MM-DD),Comments';
+  var example = [
+    'lifecycle,1,Customer health score rollout,Retention,Deepak V,2026-08-31,Critical for churn prevention',
+    'intel,2,Integrate Salesforce,Intelligence,Subhajit D,2026-09-15,Needs IT approval',
+    'ops,3,Executive escalation playbook,Escalation,Suvo,,',
+    'people,4,Manager coaching program,People,Divyatha,2026-10-01,',
+  ].join('\n');
+  var csv = headers + '\n' + example;
+  downloadFile(csv, 'roadmap_bulk_upload_template.csv', 'text/csv');
+}
+
+function bulkUploadRoadmap(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var rows = parseCSV(e.target.result);
+    if (!rows.length) {
+      showToast('No valid rows found in file');
+      event.target.value = '';
+      return;
+    }
+    var wsMap = {
+      'lifecycle': 'lifecycle', 'lifecycle excellence': 'lifecycle', '1': 'lifecycle',
+      'intel': 'intel', 'intelligence': 'intel', 'intelligence & ai': 'intel', '2': 'intel',
+      'ops': 'ops', 'operations': 'ops', 'operations excellence': 'ops', '3': 'ops',
+      'people': 'people', 'people excellence': 'people', '4': 'people'
+    };
+    var valid = rows.filter(function(r) { return r['Text'] && r['Workstream']; });
+    if (!valid.length) {
+      showToast('Rows must have at least Workstream and Text columns');
+      event.target.value = '';
+      return;
+    }
+    var payload = valid.map(function(r) {
+      var wsRaw = (r['Workstream'] || '').toLowerCase().trim();
+      var ws    = wsMap[wsRaw] || 'lifecycle';
+      var phase = Math.max(0, Math.min(5, parseInt(r['Phase (1-6)'] || r['Phase'] || '1') - 1));
+      return {
+        ws:       ws,
+        phase:    phase,
+        text:     r['Text']                      || '',
+        pillar:   r['Pillar']                    || 'Onboarding',
+        people:   r['People']                    || '',
+        due:      r['Due Date (YYYY-MM-DD)']     || r['Due Date'] || '',
+        comments: r['Comments']                  || '',
+      };
+    });
+    apiPost('/roadmap/bulk', payload)
+      .then(function(result) {
+        result.items.forEach(function(item) { roadmapItems.push(item); });
+        renderRoadmap();
+        renderOwners();
+        showToast(result.inserted + ' roadmap items uploaded');
+        event.target.value = '';
+      })
+      .catch(function(err) {
+        showToast('Upload failed: ' + err.message);
+        event.target.value = '';
+      });
+  };
+  reader.readAsText(file);
+}
+
+// ── Generic file download helper ─────────────────────────────────────────────
+function downloadFile(content, filename, mimeType) {
+  var blob = new Blob([content], { type: mimeType });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 // ── Init ──
 async function init(){setDbStatus(false,'Connecting...');await loadAllFromDB();renderPillars();renderMetrics();renderRoadmap();renderOwners();setTimeout(renderMaturityChart,100);completedSections.add('maturity');updateProgress();}

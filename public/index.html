@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CX Leadership Workshop — H2 2026</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg:#f7f6f3;--surface:#ffffff;--surface-alt:#f2f1ee;
+  --border:rgba(11,11,11,0.10);--border-strong:rgba(11,11,11,0.18);
+  --text-primary:#0b0b0b;--text-secondary:#52514e;--text-muted:#898781;
+  --accent:#2a78d6;--accent-bg:#e6f1fb;--accent-text:#0c447c;
+  --success:#0ca30c;--success-bg:#eaf3de;--success-text:#27500a;
+  --warning:#fab219;--warning-bg:#faeeda;--warning-text:#633806;
+  --danger:#e34948;--danger-bg:#fcebeb;--danger-text:#791f1f;
+  --purple:#534ab7;--purple-bg:#eeedfe;--purple-text:#3c3489;
+  --teal:#1d9e75;--teal-bg:#e1f5ee;--teal-text:#085041;
+  --radius:8px;--font:-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font-size:15px;line-height:1.6;}
+.app{display:flex;min-height:100vh;}
+.sidebar{width:240px;background:var(--surface);border-right:0.5px solid var(--border-strong);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+.main{margin-left:240px;flex:1;min-height:100vh;}
+.sidebar-header{padding:18px 18px 14px;border-bottom:0.5px solid var(--border);}
+.sidebar-logo{font-size:10px;font-weight:500;letter-spacing:0.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;}
+.sidebar-title{font-size:13px;font-weight:500;color:var(--text-primary);line-height:1.3;}
+.sidebar-nav{padding:10px 0;flex:1;}
+.nav-section{padding:8px 18px 4px;font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:7px 18px;cursor:pointer;font-size:13px;color:var(--text-secondary);transition:all 0.15s;border-left:2px solid transparent;}
+.nav-item:hover{background:var(--surface-alt);color:var(--text-primary);}
+.nav-item.active{background:var(--accent-bg);color:var(--accent-text);border-left-color:var(--accent);font-weight:500;}
+.nav-item i{font-size:16px;}
+.sidebar-progress{padding:14px 18px;border-top:0.5px solid var(--border);}
+.progress-label{font-size:11px;color:var(--text-muted);margin-bottom:6px;display:flex;justify-content:space-between;}
+.progress-bar{height:4px;background:var(--border-strong);border-radius:2px;overflow:hidden;margin-bottom:10px;}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.4s ease;}
+.page-header{background:var(--surface);border-bottom:0.5px solid var(--border);padding:18px 28px;position:sticky;top:0;z-index:50;}
+.page-header h1{font-size:17px;font-weight:500;}
+.page-header p{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.page-content{padding:24px 28px;}
+.section{display:none;}
+.section.active{display:block;}
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:16px;}
+.card-title{font-size:14px;font-weight:500;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.card-subtitle{font-size:13px;color:var(--text-muted);margin-bottom:14px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+.kpi-card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:14px 18px;}
+.kpi-label{font-size:12px;color:var(--text-muted);margin-bottom:5px;}
+.kpi-value{font-size:24px;font-weight:500;line-height:1;}
+.kpi-sub{font-size:11px;color:var(--text-secondary);margin-top:3px;}
+.priority-badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+.priority-critical{background:var(--danger-bg);color:var(--danger-text);}
+.priority-high{background:var(--warning-bg);color:var(--warning-text);}
+.priority-medium{background:var(--accent-bg);color:var(--accent-text);}
+.confidence-high{background:var(--success-bg);color:var(--success-text);}
+.confidence-medium{background:var(--warning-bg);color:var(--warning-text);}
+.confidence-low{background:var(--danger-bg);color:var(--danger-text);}
+.maturity-track{display:flex;gap:3px;}
+.maturity-step{flex:1;height:6px;border-radius:2px;background:var(--surface-alt);border:0.5px solid var(--border);}
+.maturity-step.filled{background:var(--accent);border-color:var(--accent);}
+.maturity-step.target{background:var(--teal-bg);border:1.5px dashed var(--teal);}
+.save-btn{padding:7px 14px;border-radius:var(--radius);border:0.5px solid var(--border-strong);background:var(--surface);color:var(--text-secondary);font-family:var(--font);font-size:13px;cursor:pointer;transition:all 0.15s;}
+.save-btn:hover{background:var(--surface-alt);}
+.save-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.save-btn.primary:hover{background:#1a68c6;}
+.metrics-table{width:100%;border-collapse:collapse;font-size:13px;}
+.metrics-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);white-space:nowrap;}
+.metrics-table td{padding:10px 12px;border-bottom:0.5px solid var(--border);vertical-align:top;}
+.metrics-table tr:last-child td{border-bottom:none;}
+.metrics-table tr:hover td{background:var(--surface-alt);}
+.metric-name{font-weight:500;}
+.type-badge{font-size:10px;padding:2px 7px;border-radius:20px;white-space:nowrap;}
+.type-lagging{background:var(--purple-bg);color:var(--purple-text);}
+.type-leading{background:var(--teal-bg);color:var(--teal-text);}
+.level-cell{font-size:11px;padding:2px 6px;border-radius:4px;background:var(--surface-alt);display:inline-block;white-space:nowrap;}
+.inner-tabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:0.5px solid var(--border);}
+.inner-tab{padding:7px 14px;cursor:pointer;font-size:13px;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-0.5px;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font);}
+.inner-tab:hover{color:var(--text-primary);}
+.inner-tab.active{color:var(--accent-text);border-bottom-color:var(--accent);font-weight:500;}
+.notes-area{width:100%;min-height:100px;padding:10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);background:var(--surface);color:var(--text-primary);font-family:var(--font);font-size:13px;resize:vertical;line-height:1.6;}
+.notes-area:focus{outline:none;border-color:var(--accent);}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text-primary);color:var(--bg);padding:10px 18px;border-radius:var(--radius);font-size:13px;z-index:9999;opacity:0;transform:translateY(8px);transition:all 0.25s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.owner-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--surface-alt);color:var(--text-muted);border:0.5px solid var(--border);}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">CX Leadership</div>
+    <div class="sidebar-title">H2 2026 Planning Workshop</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Diagnose</div>
+    <div class="nav-item active" onclick="navigate('maturity')"><i class="ti ti-chart-radar"></i> Maturity Assessment</div>
+
+    <div class="nav-section">Plan</div>
+    <div class="nav-item" onclick="navigate('metrics')"><i class="ti ti-target"></i> Metrics &amp; Targets</div>
+    <div class="nav-item" onclick="navigate('roadmap')"><i class="ti ti-road"></i> H2 Roadmap</div>
+    <div class="nav-item" onclick="navigate('owners')"><i class="ti ti-users"></i> Workstream wise plan</div>
+
+    <div class="nav-section">Action Logs</div>
+    <div class="nav-item" onclick="navigate('actions')"><i class="ti ti-list-check"></i> Action Item Tracker</div>
+    <div class="nav-item" onclick="navigate('notes')"><i class="ti ti-notes"></i> Workshop Notes</div>
+  </div>
+  <div class="sidebar-progress">
+    <div class="progress-label"><span>Progress</span><span id="progress-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div style="margin-top:10px">
+      <div id="db-status" style="font-size:11px;padding:6px 8px;border-radius:6px;background:var(--surface-alt);color:var(--text-muted);display:flex;align-items:center;gap:6px">
+        <span id="db-dot" style="width:7px;height:7px;border-radius:50%;background:#ccc;flex-shrink:0;display:inline-block"></span>
+        <span id="db-label">Connecting...</span>
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- Metric modal -->
+<div id="metric-modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:12px;border:0.5px solid var(--border-strong);padding:24px 28px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto">
+    <h2 style="font-size:16px;font-weight:500;margin-bottom:18px" id="modal-title">Add metric</h2>
+    <input type="hidden" id="modal-metric-id">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Metric name</label><input id="mf-name" type="text" placeholder="e.g. Expansion ARR %" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Pillar</label><select id="mf-pillar" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option>Onboarding</option><option>Adoption</option><option>Success</option><option>Retention</option><option>Advocacy</option><option>Support</option><option>Intelligence</option><option>Technology</option><option>Escalation</option><option>People</option></select></div>
+    </div>
+    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Exec question</label><input id="mf-question" type="text" placeholder="e.g. Are we growing within our customer base?" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Formula</label><input id="mf-formula" type="text" placeholder="e.g. (Numerator / Denominator) x 100" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:18px">
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Type</label><select id="mf-type" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option>Leading</option><option>Lagging</option></select></div>
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">L2</label><input id="mf-l2" type="text" placeholder="e.g. 60-75%" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">L3</label><input id="mf-l3" type="text" placeholder="e.g. 75-85%" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">L4</label><input id="mf-l4" type="text" placeholder="e.g. >90%" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="save-btn" onclick="closeMetricModal()">Cancel</button>
+      <button class="save-btn primary" onclick="saveMetricModal()"><i class="ti ti-check" aria-hidden="true"></i> Save metric</button>
+    </div>
+  </div>
+</div>
+
+<!-- Roadmap item modal -->
+<div id="rm-modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:12px;border:0.5px solid var(--border-strong);padding:24px 28px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto">
+    <h2 style="font-size:16px;font-weight:500;margin-bottom:18px" id="rm-modal-title">Add roadmap item</h2>
+    <input type="hidden" id="rm-item-id">
+    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Item description</label><input id="rm-text" type="text" placeholder="e.g. Customer health score rollout" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Pillar</label><select id="rm-pillar" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option>Onboarding</option><option>Adoption</option><option>Success</option><option>Retention</option><option>Advocacy</option><option>Support</option><option>Intelligence</option><option>Technology</option><option>Escalation</option><option>People</option></select></div>
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Workstream</label><select id="rm-ws" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option value="lifecycle">1. Customer Lifecycle Excellence</option><option value="intel">2. Customer Intelligence &amp; AI</option><option value="ops">3. Customer Operations Excellence</option><option value="people">4. People Excellence</option></select></div>
+    </div>
+    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Phase</label><select id="rm-phase" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option value="0">Month 1 - Standardize</option><option value="1">Month 2 - Instrument</option><option value="2">Month 3 - Predict</option><option value="3">Month 4 - Automate</option><option value="4">Month 5 - Optimize</option><option value="5">Month 6 - Scale</option></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">People to work with</label><input id="rm-people" type="text" placeholder="e.g. Jidesh M, Deepak V" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Expected due date</label><input id="rm-due" type="date" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"></div>
+    </div>
+    <div style="margin-bottom:18px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Comments</label><textarea id="rm-comments" rows="3" placeholder="Notes, dependencies, risks..." style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);resize:vertical;line-height:1.5"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="save-btn" onclick="closeRmModal()">Cancel</button>
+      <button class="save-btn primary" onclick="saveRmItem()"><i class="ti ti-check" aria-hidden="true"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Action item modal -->
+<div id="action-modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:12px;border:0.5px solid var(--border-strong);padding:24px 28px;width:520px;max-width:96vw;max-height:92vh;overflow-y:auto">
+    <h2 style="font-size:16px;font-weight:500;margin-bottom:18px" id="action-modal-title">Add action item</h2>
+    <input type="hidden" id="action-item-id">
+    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Item details</label><textarea id="action-detail" rows="3" placeholder="Describe the action item clearly..." style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);resize:vertical;line-height:1.5"></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Owner</label><input id="action-owner" type="text" placeholder="e.g. Jidesh M" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface)"></div>
+      <div><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Expected closure</label><input id="action-due" type="date" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"></div>
+    </div>
+    <div style="margin-bottom:14px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Status</label><select id="action-status" style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);color:var(--text-primary)"><option value="open">Open</option><option value="inprogress">In Progress</option><option value="done">Done</option><option value="blocked">Blocked</option></select></div>
+    <div style="margin-bottom:18px"><label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px">Comments</label><textarea id="action-comments" rows="3" placeholder="Notes, blockers, context..." style="width:100%;padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:13px;font-family:var(--font);background:var(--surface);resize:vertical;line-height:1.5"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="save-btn" onclick="closeActionModal()">Cancel</button>
+      <button class="save-btn primary" onclick="saveActionItem()"><i class="ti ti-check" aria-hidden="true"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="toast" id="toast"></div>
+<script>
+var actionItems=[];var actionIdCounter=1;
+
+// API helpers
+var API = '/api';
+function apiGet(p){return fetch(API+p).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();});}
+function apiPost(p,d){return fetch(API+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();});}
+function apiPut(p,d){return fetch(API+p,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();});}
+function apiDelete(p){return fetch(API+p,{method:'DELETE'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();});}
+function setDbStatus(ok,msg){var dot=document.getElementById('db-dot');var lbl=document.getElementById('db-label');if(!dot)return;dot.style.background=ok?'#1baf7a':'#e34948';lbl.textContent=msg;lbl.style.color=ok?'var(--teal-text)':'var(--danger-text)';}
+
+async function loadAllFromDB(){
+  try{
+    await apiGet('/health');
+    setDbStatus(true,'Connected to database');
+    var r=await Promise.all([apiGet('/roadmap'),apiGet('/actions'),apiGet('/metrics'),apiGet('/dri'),apiGet('/notes')]);
+    roadmapItems=r[0]; roadmapItemIdCounter=roadmapItems.length?Math.max.apply(null,roadmapItems.map(function(x){return x.id;}))+1:1;
+    actionItems=r[1];  actionIdCounter=actionItems.length?Math.max.apply(null,actionItems.map(function(x){return x.id;}))+1:1;
+    METRICS=r[2];      metricIdCounter=METRICS.length?Math.max.apply(null,METRICS.map(function(x){return x.id;}))+1:1;
+    pillarDRIOverrides=r[3];
+    var notes=r[4];
+    setTimeout(function(){['day1','day2','day3','parking'].forEach(function(k){var el=document.getElementById('notes-'+k);if(el)el.value=notes[k]||'';});},100);
+    return true;
+  }catch(e){setDbStatus(false,'Cannot reach server');console.error(e);return false;}
+}
+
+// ── Data ─────────────────────────────────────────────────────────────────────
+const PILLARS = [
+  { id:'onboarding', name:'Customer Onboarding', dri:'Jidesh M', objective:'Accelerate predictable Time-to-Value', level:2, confidence:'High', priority:'High', sponsor:'SVP CX', evidence:'On-Time Go-Live is ~25%, Time-to-Value is 53 days, OB CSAT is 4.33/5. Customer satisfaction is reasonable, but delivery predictability is well below L4 benchmarks.', levels:['Manual implementations','Templates & playbooks','Segmented journeys','Risk prediction','Outcome-led onboarding','AI-guided onboarding'] },
+  { id:'adoption', name:'Customer Adoption', dri:'Deepak V', objective:'Drive sustained adoption', level:1, confidence:'Low', priority:'High', sponsor:'SVP CX', evidence:'No adoption metrics found — activation rate, feature adoption, WAU/MAU, or adoption score coverage are all absent.', levels:['Usage reports','Periodic reviews','Defined adoption programs','Predictive adoption','Outcome-based adoption','AI orchestration'] },
+  { id:'success', name:'Customer Success & Value', dri:'Deepak V', objective:'Deliver measurable outcomes', level:2, confidence:'Medium', priority:'High', sponsor:'SVP CX', evidence:'Health check-ins and churn reporting exist, but no success plans, outcome achievement, EBR coverage, or ROI realization evidence found.', levels:['Anecdotal ROI','Success plans','Business reviews','Outcome forecasting','Value realization mgmt','Continuous optimization'] },
+  { id:'retention', name:'Customer Retention', dri:'Deepak V', objective:'Maximize renewals', level:2, confidence:'Medium', priority:'Critical', sponsor:'SVP CX', evidence:'Churn is measured and reviewed, but there are no health scores, renewal risk scores, or predictive retention metrics.', levels:['Reactive renewals','Churn reviews','Health scores','Churn prediction','Strategic retention','Autonomous interventions'] },
+  { id:'advocacy', name:'Customer Advocacy & Community', dri:'Suvo + New PM + Preethi', objective:'Create advocates', level:2, confidence:'High', priority:'Medium', sponsor:'Marketing/CX', evidence:'NPS is measured (22.68), but no metrics for advocacy, referrals, community engagement, or referenceable customers.', levels:['Ad hoc references','Reference program','Structured advocacy','Sentiment analytics','Community-led growth','AI advocacy'] },
+  { id:'support', name:'Customer Support & Service', dri:'Anirban M', objective:'Deliver effortless support', level:3, confidence:'High', priority:'High', sponsor:'Support Head', evidence:'Ticket CSAT, resolution metrics, SLAs, and operational support metrics indicate a well-managed support function.', levels:['Ticket handling','SLA management','Knowledge mgmt','Intelligent routing','Proactive support','Autonomous resolution'] },
+  { id:'intelligence', name:'Customer Intelligence & VoC', dri:'Subhajit D + Valeed + Preethi', objective:'Customer 360', level:2, confidence:'Medium', priority:'Critical', sponsor:'CX Ops', evidence:'Dashboards and reporting exist, but no Customer 360, predictive analytics, or forecast accuracy evidence.', levels:['Basic reporting','Dashboards','Unified data','Predictive analytics','Intelligence platform','Autonomous insights'] },
+  { id:'technology', name:'Technology, Operations & AI', dri:'Subhajit D + Valeed', objective:'Scale through automation', level:2, confidence:'Low', priority:'Critical', sponsor:'Engineering/CX', evidence:'Operational reporting exists, but no workflow automation, AI adoption, or system integration maturity metrics.', levels:['Point tools','Integrated systems','Workflow orchestration','AI copilots','Customer OS','Multi-agent AI'] },
+  { id:'escalation', name:'Executive Escalation Management', dri:'Suvo + New PM + Subhajit D', objective:'Prevent CEO escalations', level:1, confidence:'Low', priority:'Critical', sponsor:'SVP CX', evidence:'No executive escalation KPIs tracked — CEO escalation rate, surprise escalations, or executive recovery success are absent.', levels:['Reactive','Tracked','Playbooks','Predictive prevention','Executive intelligence','Autonomous prevention'] },
+  { id:'people', name:'People Excellence', dri:'Divyatha + Jaff + Nitish', objective:'Build talent & capability', level:1, confidence:'Low', priority:'High', sponsor:'HR + SVP CX', evidence:'No workforce capability metrics — time-to-productivity, competency coverage, enablement, or regrettable attrition included.', levels:['Basic hiring','Role definitions','Competencies','Predictive capability','Outcome aligned org','AI workforce'] },
+];
+
+let METRICS = [
+  { id:1,  pillar:'Onboarding',   name:'On-Time Go-Live %',        question:'Are implementations completing on time?',       type:'Lagging', formula:'(On-Time Go-Lives / Total Go-Lives) x 100',                                          l2:'60-75%',   l3:'75-85%',   l4:'85-92%'  },
+  { id:2,  pillar:'Onboarding',   name:'Time-to-Value',             question:'How quickly do customers realize value?',       type:'Lagging', formula:'Avg(Days from Kickoff to First Business Outcome)',                                     l2:'60-90d',   l3:'45-60d',   l4:'30-45d'  },
+  { id:3,  pillar:'Onboarding',   name:'Implementation CSAT',       question:'Are customers satisfied with onboarding?',      type:'Lagging', formula:'(Positive CSAT Responses / Total Responses) x 100',                                  l2:'80-85%',   l3:'85-90%',   l4:'90-92%'  },
+  { id:4,  pillar:'Onboarding',   name:'Milestone Adherence',       question:'Are projects on schedule?',                    type:'Leading', formula:'(Milestones Completed On-Time / Total Milestones) x 100',                            l2:'60-75%',   l3:'75-85%',   l4:'>90%'    },
+  { id:5,  pillar:'Adoption',     name:'90-Day Adoption %',         question:'Are customers adopting successfully?',          type:'Lagging', formula:'(Accounts meeting Threshold / New Accounts) x 100',                                  l2:'50-65%',   l3:'65-75%',   l4:'75-85%'  },
+  { id:6,  pillar:'Adoption',     name:'Feature Adoption %',        question:'Are key features being adopted?',               type:'Leading', formula:'(Customers Using Key Features / Active Customers) x 100',                           l2:'30-45%',   l3:'45-60%',   l4:'60-70%'  },
+  { id:7,  pillar:'Adoption',     name:'WAU/MAU',                   question:'Are users consistently engaged?',               type:'Leading', formula:'(Weekly Active Users / Monthly Active Users) x 100',                                l2:'30-45%',   l3:'45-60%',   l4:'>65%'    },
+  { id:8,  pillar:'Adoption',     name:'Activation Rate',           question:'Are new customers activating?',                 type:'Leading', formula:'(Activated Customers / New Customers) x 100',                                       l2:'40-60%',   l3:'60-75%',   l4:'>80%'    },
+  { id:9,  pillar:'Success',      name:'Success Plan Coverage',     question:'Do customers have success plans?',              type:'Leading', formula:'(Accounts with Success Plan / Managed Accounts) x 100',                             l2:'30-60%',   l3:'>80%',     l4:'>90%'    },
+  { id:10, pillar:'Success',      name:'EBR Completion %',          question:'Are value reviews completed?',                  type:'Leading', formula:'(Completed EBRs / Planned EBRs) x 100',                                            l2:'40-60%',   l3:'60-80%',   l4:'>90%'    },
+  { id:11, pillar:'Retention',    name:'NRR',                       question:'Are we growing existing revenue?',              type:'Lagging', formula:'((Start ARR - Churn + Expansion) / Start ARR) x 100',                               l2:'100-105%', l3:'105-110%', l4:'110-115%'},
+  { id:12, pillar:'Retention',    name:'GRR',                       question:'Are we retaining recurring revenue?',           type:'Lagging', formula:'((Start ARR - Churn - Contraction) / Start ARR) x 100',                             l2:'85-90%',   l3:'90-93%',   l4:'93-95%'  },
+  { id:13, pillar:'Retention',    name:'Logo Churn %',              question:'Are we retaining customers?',                   type:'Lagging', formula:'(Customers Lost / Starting Customers) x 100',                                       l2:'12-15%',   l3:'10-12%',   l4:'8-10%'   },
+  { id:14, pillar:'Retention',    name:'Health Score Coverage',     question:'Can we identify churn risk?',                   type:'Leading', formula:'(Accounts with Health Score / Total Accounts) x 100',                               l2:'30%',      l3:'70%',      l4:'>95%'    },
+  { id:15, pillar:'Advocacy',     name:'NPS',                       question:'Will customers recommend us?',                  type:'Lagging', formula:'% Promoters - % Detractors',                                                        l2:'20-30',    l3:'30-40',    l4:'40-50'   },
+  { id:16, pillar:'Support',      name:'CSAT',                      question:'Are customers satisfied with support?',         type:'Lagging', formula:'(Positive CSAT Responses / Total Responses) x 100',                                 l2:'80-85%',   l3:'85-88%',   l4:'88-92%'  },
+  { id:17, pillar:'Support',      name:'First Response Time',       question:'How quickly do we respond?',                    type:'Lagging', formula:'Average(Time from Ticket Creation to First Reply)',                                   l2:'4-8h',     l3:'2-4h',     l4:'<2h'     },
+  { id:18, pillar:'Support',      name:'AI Deflection Rate',        question:'How much work is automated?',                   type:'Leading', formula:'(AI-Resolved Tickets / Total Tickets) x 100',                                       l2:'15-30%',   l3:'30-45%',   l4:'45-60%'  },
+  { id:19, pillar:'Support',      name:'SLA Compliance',            question:'Are SLAs being met?',                           type:'Lagging', formula:'(Tickets Resolved within SLA / Total Tickets) x 100',                              l2:'80-90%',   l3:'90-95%',   l4:'>95%'    },
+  { id:20, pillar:'Intelligence', name:'Customer360 Coverage',      question:'Do we have unified customer data?',             type:'Leading', formula:'(Accounts with 360 Profile / Total Accounts) x 100',                                l2:'30-50%',   l3:'70%',      l4:'>90%'    },
+  { id:21, pillar:'Intelligence', name:'Forecast Accuracy',         question:'Can we predict customer outcomes?',             type:'Lagging', formula:'(Accurate Forecasts / Total Forecasts) x 100',                                      l2:'50-60%',   l3:'60-70%',   l4:'70-80%'  },
+  { id:22, pillar:'Escalation',   name:'CEO Escalation Rate',       question:'Are we preventing CEO escalations?',            type:'Lagging', formula:'(CEO Escalations / Active Customers) x 100',                                        l2:'1-2%',     l3:'0.8-1.2%', l4:'<1%'     },
+  { id:23, pillar:'Escalation',   name:'Surprise Escalation %',     question:'Are we identifying issues early?',              type:'Lagging', formula:'(Escalations without Prior Risk Flag / Total Escalations) x 100',                   l2:'40-70%',   l3:'20-40%',   l4:'<15%'    },
+  { id:24, pillar:'People',       name:'Time-to-Productivity',      question:'How quickly do new hires contribute?',          type:'Leading', formula:'Avg(Days from Start to First Independent Outcome)',                                   l2:'90-120d',  l3:'60-90d',   l4:'<60d'    },
+  { id:25, pillar:'People',       name:'Training Completion %',     question:'Are employees fully enabled?',                  type:'Leading', formula:'(Completed Training / Assigned Training) x 100',                                    l2:'50-70%',   l3:'70-85%',   l4:'>95%'    },
+  { id:26, pillar:'People',       name:'Regrettable Attrition %',   question:'Are we retaining top talent?',                  type:'Lagging', formula:'(Regrettable Attritions / Total Headcount) x 100',                                  l2:'10-15%',   l3:'7-10%',    l4:'<5%'     },
+];
+let metricIdCounter = 27;
+
+let roadmapItems = [
+  {id:1,ws:'lifecycle',phase:0,text:'Standard customer journey',pillar:'Onboarding',people:'',due:'',comments:''},
+  {id:2,ws:'lifecycle',phase:0,text:'Onboarding methodology',pillar:'Onboarding',people:'',due:'',comments:''},
+  {id:3,ws:'lifecycle',phase:0,text:'Success Plan template',pillar:'Success',people:'',due:'',comments:''},
+  {id:4,ws:'lifecycle',phase:0,text:'EBR framework',pillar:'Success',people:'',due:'',comments:''},
+  {id:5,ws:'lifecycle',phase:0,text:'Renewal playbooks',pillar:'Retention',people:'',due:'',comments:''},
+  {id:6,ws:'lifecycle',phase:1,text:'Customer 360 data',pillar:'Intelligence',people:'',due:'',comments:''},
+  {id:7,ws:'lifecycle',phase:1,text:'Adoption dashboards',pillar:'Adoption',people:'',due:'',comments:''},
+  {id:8,ws:'lifecycle',phase:2,text:'Customer Health Score',pillar:'Retention',people:'',due:'',comments:''},
+  {id:9,ws:'lifecycle',phase:2,text:'Renewal Risk Score',pillar:'Retention',people:'',due:'',comments:''},
+  {id:10,ws:'lifecycle',phase:3,text:'Automated onboarding alerts',pillar:'Onboarding',people:'',due:'',comments:''},
+  {id:11,ws:'lifecycle',phase:3,text:'Adoption campaigns',pillar:'Adoption',people:'',due:'',comments:''},
+  {id:12,ws:'lifecycle',phase:4,text:'Executive Business Reviews',pillar:'Success',people:'',due:'',comments:''},
+  {id:13,ws:'lifecycle',phase:5,text:'Continuous lifecycle optimization',pillar:'Success',people:'',due:'',comments:''},
+  {id:14,ws:'intel',phase:0,text:'KPI dictionary',pillar:'Intelligence',people:'',due:'',comments:''},
+  {id:15,ws:'intel',phase:0,text:'Data governance framework',pillar:'Intelligence',people:'',due:'',comments:''},
+  {id:16,ws:'intel',phase:1,text:'Integrate Rocketlane',pillar:'Technology',people:'',due:'',comments:''},
+  {id:17,ws:'intel',phase:1,text:'Integrate Zendesk',pillar:'Support',people:'',due:'',comments:''},
+  {id:18,ws:'intel',phase:2,text:'Churn prediction model',pillar:'Retention',people:'',due:'',comments:''},
+  {id:19,ws:'intel',phase:2,text:'Executive risk model',pillar:'Escalation',people:'',due:'',comments:''},
+  {id:20,ws:'intel',phase:3,text:'AI copilots for CSMs',pillar:'Technology',people:'',due:'',comments:''},
+  {id:21,ws:'intel',phase:3,text:'Executive dashboards',pillar:'Intelligence',people:'',due:'',comments:''},
+  {id:22,ws:'intel',phase:4,text:'AI model tuning',pillar:'Technology',people:'',due:'',comments:''},
+  {id:23,ws:'intel',phase:5,text:'Self-service analytics portal',pillar:'Intelligence',people:'',due:'',comments:''},
+  {id:24,ws:'ops',phase:0,text:'SLA framework',pillar:'Support',people:'',due:'',comments:''},
+  {id:25,ws:'ops',phase:0,text:'Escalation playbook',pillar:'Escalation',people:'',due:'',comments:''},
+  {id:26,ws:'ops',phase:1,text:'Unified support dashboards',pillar:'Support',people:'',due:'',comments:''},
+  {id:27,ws:'ops',phase:1,text:'Escalation tracker',pillar:'Escalation',people:'',due:'',comments:''},
+  {id:28,ws:'ops',phase:2,text:'Executive Risk Score',pillar:'Escalation',people:'',due:'',comments:''},
+  {id:29,ws:'ops',phase:3,text:'Auto-escalation workflows',pillar:'Escalation',people:'',due:'',comments:''},
+  {id:30,ws:'ops',phase:4,text:'Reduce CEO escalation rate',pillar:'Escalation',people:'',due:'',comments:''},
+  {id:31,ws:'ops',phase:5,text:'CX Command Center',pillar:'Technology',people:'',due:'',comments:''},
+  {id:32,ws:'people',phase:0,text:'Competency framework',pillar:'People',people:'',due:'',comments:''},
+  {id:33,ws:'people',phase:0,text:'Learning curriculum',pillar:'People',people:'',due:'',comments:''},
+  {id:34,ws:'people',phase:1,text:'Skills assessment program',pillar:'People',people:'',due:'',comments:''},
+  {id:35,ws:'people',phase:2,text:'Talent risk analysis',pillar:'People',people:'',due:'',comments:''},
+  {id:36,ws:'people',phase:3,text:'Learning automation',pillar:'People',people:'',due:'',comments:''},
+  {id:37,ws:'people',phase:4,text:'Coaching effectiveness review',pillar:'People',people:'',due:'',comments:''},
+  {id:38,ws:'people',phase:5,text:'Continuous learning platform',pillar:'People',people:'',due:'',comments:''},
+];
+let roadmapItemIdCounter = 39;
+let pendingRoadmapDeleteId = null;
+
+const WORKSTREAMS = [
+  { id:'lifecycle', name:'1. Customer Lifecycle Excellence', color:'accent' },
+  { id:'intel',     name:'2. Customer Intelligence & AI',    color:'teal'   },
+  { id:'ops',       name:'3. Customer Operations Excellence',color:'amber'  },
+  { id:'people',    name:'4. People Excellence',             color:'purple' },
+];
+
+const PILLAR_NAMES = ['Onboarding','Adoption','Success','Retention','Advocacy','Support','Intelligence','Technology','Escalation','People'];
+const PHASE_NAMES  = ['Month 1 - Standardize','Month 2 - Instrument','Month 3 - Predict','Month 4 - Automate','Month 5 - Optimize','Month 6 - Scale'];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let metricTargets = {};
+let wsComments = {};
+let completedSections = new Set();
+let currentMetricFilter = 'all';
+let pendingDeleteId = null;
+let pendingActionDeleteId = null;
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2200);
+}
+
+// ── Pillar colors ─────────────────────────────────────────────────────────────
+const PILLAR_COLORS = {
+  Onboarding:'#e6f1fb|#0c447c', Adoption:'#e1f5ee|#085041', Success:'#eeedfe|#3c3489',
+  Retention:'#fcebeb|#791f1f', Advocacy:'#fbeaf0|#72243e', Support:'#faeeda|#633806',
+  Intelligence:'#eaf3de|#27500a', Technology:'#f1eff8|#3c3489', Escalation:'#faece7|#712b13', People:'#e6f1fb|#185fa5'
+};
+function pillarChip(pillar) {
+  var parts = (PILLAR_COLORS[pillar]||'#f2f1ee|#52514e').split('|');
+  return '<span style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:8px;background:'+parts[0]+';color:'+parts[1]+';margin-top:3px;font-weight:500">'+pillar+'</span>';
+}
+
+// ── Render maturity pillars ───────────────────────────────────────────────────
+function renderPillars() {
+  var grid = document.getElementById('pillar-grid');
+  var levelNames = ['Reactive','Managed','Standardized','Predictive','Strategic','Autonomous'];
+  grid.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">' +
+    PILLARS.map(function(p) {
+      var filled = Array.from({length:6}, function(_,i) { return i < p.level ? 'filled' : i === 3 ? 'target' : ''; });
+      var steps  = filled.map(function(c) { return '<div class="maturity-step '+c+'"></div>'; }).join('');
+      var priCls  = p.priority === 'Critical' ? 'priority-critical' : p.priority === 'High' ? 'priority-high' : 'priority-medium';
+      var confCls = p.confidence === 'High' ? 'confidence-high' : p.confidence === 'Medium' ? 'confidence-medium' : 'confidence-low';
+      var curName = levelNames[p.level - 1] || '';
+      return '<div style="background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:16px 20px">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">'
+        +   '<div><div style="font-size:14px;font-weight:500;color:var(--text-primary)">'+p.name+'</div>'
+        +   '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">DRI: '+p.dri+' &nbsp;&middot;&nbsp; Sponsor: '+p.sponsor+'</div></div>'
+        +   '<div style="display:flex;gap:6px;flex-shrink:0;align-items:center">'
+        +     '<span style="font-size:10px;color:var(--text-muted);font-weight:500">AI Priority:</span>'
+        +     '<span class="priority-badge '+priCls+'">'+p.priority+'</span>'
+        +   '</div>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;margin-bottom:12px">'
+        +   '<div>'
+        +     '<div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:6px">Maturity level</div>'
+        +     '<div class="maturity-track">'+steps+'</div>'
+        +     '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:4px"><span>L1 Reactive</span><span>L6 Autonomous</span></div>'
+        +     '<div style="margin-top:6px;font-size:12px">Current: <strong style="color:var(--accent-text)">L'+p.level+' - '+curName+'</strong> &nbsp;&rarr;&nbsp; Target: <strong style="color:var(--teal-text)">L4 - Predictive</strong></div>'
+        +   '</div>'
+        +   '<div>'
+        +     '<div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:6px">Objective</div>'
+        +     '<div style="font-size:12px;color:var(--text-secondary)">'+escHtml(p.objective)+'</div>'
+        +   '</div>'
+        + '</div>'
+        + '<div>'
+        +   '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+        +     '<div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Evidence on file</div>'
+        +     '<span class="priority-badge '+confCls+'">'+p.confidence+' confidence</span>'
+        +   '</div>'
+        +   '<div style="background:var(--surface-alt);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:8px 12px;font-size:12px;color:var(--text-secondary);line-height:1.5">'+escHtml(p.evidence)+'</div>'
+        + '</div>'
+        + '</div>';
+    }).join('') + '</div>';
+}
+
+// ── Maturity chart ────────────────────────────────────────────────────────────
+var maturityChartInstance = null;
+function renderMaturityChart() {
+  var ctx = document.getElementById('maturityChart').getContext('2d');
+  if (maturityChartInstance) maturityChartInstance.destroy();
+  maturityChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: PILLARS.map(function(p) { return p.name.replace('Customer ','').replace(' & Community','').replace(' & Value',''); }),
+      datasets: [
+        { label: 'Current level', data: PILLARS.map(function(p) { return p.level; }), backgroundColor: '#b5d4f4', borderColor: '#2a78d6', borderWidth: 1.5, borderRadius: 4 },
+        { label: 'Target (L4)', data: PILLARS.map(function() { return 4; }), backgroundColor: 'transparent', borderColor: '#1d9e75', borderWidth: 1.5, type: 'line', pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min:0, max:6, ticks:{ stepSize:1, callback: function(v) { return 'L'+v; }, color:'#898781', font:{size:11} }, grid:{ color:'#e1e0d9' } },
+        x: { ticks:{ color:'#898781', font:{size:10}, maxRotation:35 }, grid:{ display:false } }
+      }
+    }
+  });
+}
+
+// ── Metrics ───────────────────────────────────────────────────────────────────
+function setMetricFilter(f) {
+  currentMetricFilter = f;
+  document.querySelectorAll('#section-metrics .inner-tab').forEach(function(t,i) {
+    var filters = ['all','Onboarding','Adoption','Retention','Support','other'];
+    t.classList.toggle('active', filters[i] === f);
+  });
+  renderMetrics();
+}
+
+function renderMetrics() {
+  var f = currentMetricFilter;
+  var list = f === 'all' ? METRICS
+    : f === 'other' ? METRICS.filter(function(m) { return !['Onboarding','Adoption','Retention','Support'].includes(m.pillar); })
+    : METRICS.filter(function(m) { return m.pillar === f; });
+
+  document.getElementById('metrics-empty').style.display = list.length ? 'none' : 'block';
+  document.getElementById('metrics-tbody-main').innerHTML = list.map(function(m) {
+    var typeCls = m.type === 'Lagging' ? 'type-lagging' : 'type-leading';
+    var saved = metricTargets[m.id] || '';
+    return '<tr>'
+      + '<td><div class="metric-name">'+escHtml(m.name)+'</div></td>'
+      + '<td><span style="font-size:11px;padding:2px 7px;border-radius:20px;background:var(--surface-alt);color:var(--text-secondary)">'+m.pillar+'</span></td>'
+      + '<td style="font-size:11px;color:var(--text-muted);line-height:1.4">'+escHtml(m.formula)+'</td>'
+      + '<td><span class="type-badge '+typeCls+'">'+m.type+'</span></td>'
+      + '<td><span class="level-cell">'+m.l2+'</span></td>'
+      + '<td><span class="level-cell">'+m.l3+'</span></td>'
+      + '<td><span class="level-cell" style="background:var(--teal-bg);color:var(--teal-text)">'+m.l4+'</span></td>'
+      + '<td><input style="width:88px;padding:4px 7px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:12px;font-family:var(--font);background:var(--surface)" value="'+escHtml(saved)+'" placeholder="'+m.l4+'" onchange="saveMetricTarget('+m.id+',this.value)"></td>'
+      + '<td style="white-space:nowrap;padding:8px 10px">'
+      +   (pendingDeleteId === m.id
+        ? '<span style="font-size:11px;color:var(--danger-text);margin-right:6px;font-weight:500">Delete?</span>'
+          + '<button onclick="confirmDelete('+m.id+')" style="background:var(--danger);border:none;border-radius:var(--radius);cursor:pointer;color:#fff;padding:4px 9px;font-size:11px;font-weight:500;margin-right:4px">Confirm</button>'
+          + '<button onclick="cancelDelete()" style="background:var(--surface-alt);border:0.5px solid var(--border-strong);border-radius:var(--radius);cursor:pointer;color:var(--text-secondary);padding:4px 9px;font-size:11px">Cancel</button>'
+        : '<button onclick="openMetricModal('+m.id+')" style="background:var(--accent-bg);border:0.5px solid var(--border-strong);border-radius:var(--radius);cursor:pointer;color:var(--accent-text);padding:4px 8px;font-size:11px;font-family:var(--font);margin-right:4px">Edit</button>'
+          + '<button onclick="deleteMetric('+m.id+')" style="background:#fcebeb;border:0.5px solid var(--border-strong);border-radius:var(--radius);cursor:pointer;color:#791f1f;padding:4px 8px;font-size:11px;font-family:var(--font)">Delete</button>')
+      + '</td></tr>';
+  }).join('');
+}
+
+function saveMetricTarget(id, val) { metricTargets[id] = val; showToast('Target saved'); }
+
+function openMetricModal(id) {
+  var modal = document.getElementById('metric-modal-backdrop');
+  if (id) {
+    var m = METRICS.find(function(x) { return x.id === id; });
+    if (!m) return;
+    document.getElementById('modal-title').textContent = 'Edit metric';
+    document.getElementById('modal-metric-id').value = id;
+    document.getElementById('mf-name').value = m.name;
+    document.getElementById('mf-pillar').value = m.pillar;
+    document.getElementById('mf-question').value = m.question;
+    document.getElementById('mf-formula').value = m.formula;
+    document.getElementById('mf-type').value = m.type;
+    document.getElementById('mf-l2').value = m.l2;
+    document.getElementById('mf-l3').value = m.l3;
+    document.getElementById('mf-l4').value = m.l4;
+  } else {
+    document.getElementById('modal-title').textContent = 'Add metric';
+    document.getElementById('modal-metric-id').value = '';
+    ['mf-name','mf-question','mf-formula','mf-l2','mf-l3','mf-l4'].forEach(function(id) { document.getElementById(id).value = ''; });
+    document.getElementById('mf-type').value = 'Leading';
+    document.getElementById('mf-pillar').value = 'Onboarding';
+  }
+  modal.style.display = 'flex';
+}
+function closeMetricModal() { document.getElementById('metric-modal-backdrop').style.display = 'none'; }
+function saveMetricModal() {
+  var name = document.getElementById('mf-name').value.trim();
+  if (!name) { showToast('Metric name is required'); return; }
+  var rawId = document.getElementById('modal-metric-id').value;
+  var obj = {
+    pillar: document.getElementById('mf-pillar').value,
+    name: name,
+    question: document.getElementById('mf-question').value.trim(),
+    formula: document.getElementById('mf-formula').value.trim(),
+    type: document.getElementById('mf-type').value,
+    l2: document.getElementById('mf-l2').value.trim(),
+    l3: document.getElementById('mf-l3').value.trim(),
+    l4: document.getElementById('mf-l4').value.trim(),
+  };
+  if(rawId){apiPut('/metrics/'+rawId,obj).then(function(u){var i=METRICS.findIndex(function(x){return x.id===parseInt(rawId);});if(i>-1)METRICS[i]=u;closeMetricModal();renderMetrics();showToast('Metric updated');}).catch(function(e){showToast('Error: '+e.message);});} else {apiPost('/metrics',obj).then(function(c){METRICS.push(c);closeMetricModal();renderMetrics();showToast('Metric added');}).catch(function(e){showToast('Error: '+e.message);});}
+}
+function deleteMetric(id) { pendingDeleteId = id; renderMetrics(); }
+function confirmDelete(id){apiDelete('/metrics/'+id).then(function(){METRICS=METRICS.filter(function(m){return m.id!==id;});pendingDeleteId=null;renderMetrics();showToast('Metric deleted');}).catch(function(e){showToast('Error: '+e.message);});}
+function cancelDelete() { pendingDeleteId = null; renderMetrics(); }
+
+// ── Roadmap ───────────────────────────────────────────────────────────────────
+function renderRoadmap() {
+  var wsFilter = document.getElementById('rm-filter-ws') ? document.getElementById('rm-filter-ws').value : 'all';
+  var pillarFilter = document.getElementById('rm-filter-pillar') ? document.getElementById('rm-filter-pillar').value : 'all';
+  var phaseShort = ['Standardize','Instrument','Predict','Automate','Optimize','Scale'];
+  var icons = {lifecycle:'ti-users',intel:'ti-cpu',ops:'ti-shield',people:'ti-school'};
+  var visibleWS = wsFilter === 'all' ? WORKSTREAMS : WORKSTREAMS.filter(function(w) { return w.id === wsFilter; });
+
+  var html = '<table style="width:100%;border-collapse:collapse;min-width:820px"><thead><tr>';
+  html += '<th style="width:150px;text-align:left;padding:8px 12px;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);background:var(--surface)">Workstream</th>';
+  phaseShort.forEach(function(ph,i) {
+    html += '<th style="padding:8px 10px;font-size:10px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);background:var(--surface);text-align:center;min-width:130px"><div style="color:var(--text-secondary)">Month '+(i+1)+'</div><div style="font-weight:400;text-transform:none;letter-spacing:0;font-size:9px;color:var(--text-muted);margin-top:1px">'+ph+'</div></th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  visibleWS.forEach(function(ws) {
+    html += '<tr><td style="padding:12px;border-bottom:0.5px solid var(--border);border-right:0.5px solid var(--border);background:var(--surface);vertical-align:top"><div style="display:flex;align-items:center;gap:6px"><i class="ti '+(icons[ws.id]||'ti-circle')+'" style="font-size:14px;color:var(--text-muted)"></i><span style="font-size:11px;font-weight:500;color:var(--text-secondary);line-height:1.3">'+ws.name.replace(/^\d+\.\s*/,'')+'</span></div></td>';
+    for (var phase = 0; phase < 6; phase++) {
+      var items = roadmapItems.filter(function(it) { return it.ws === ws.id && it.phase === phase; });
+      if (pillarFilter !== 'all') items = items.filter(function(it) { return it.pillar === pillarFilter; });
+      var wsId = ws.id, ph = phase;
+      html += '<td style="padding:8px;border-bottom:0.5px solid var(--border);border-right:0.5px solid var(--border);background:var(--surface);vertical-align:top;min-width:120px">';
+      items.forEach(function(it) {
+        var colorParts = (PILLAR_COLORS[it.pillar]||'#f2f1ee|#52514e').split('|');
+        var bg = colorParts[0], fg = colorParts[1];
+        var dueFmt = it.due ? new Date(it.due).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
+        if (pendingRoadmapDeleteId === it.id) {
+          html += '<div style="background:#fcebeb;border:1px solid #f09595;border-radius:6px;padding:6px 8px;margin-bottom:6px;font-size:11px">'
+            + '<div style="font-weight:500;color:#791f1f;margin-bottom:5px">Delete?</div>'
+            + '<div style="display:flex;gap:4px">'
+            + '<button onclick="confirmRmDelete('+it.id+')" style="flex:1;background:#e34948;border:none;border-radius:4px;cursor:pointer;color:#fff;padding:3px 0;font-size:10px;font-weight:500">Confirm</button>'
+            + '<button onclick="cancelRmDelete()" style="flex:1;background:var(--surface-alt);border:0.5px solid var(--border-strong);border-radius:4px;cursor:pointer;color:var(--text-secondary);padding:3px 0;font-size:10px">Cancel</button>'
+            + '</div></div>';
+        } else {
+          html += '<div style="background:'+bg+';border-radius:6px;padding:7px 9px;margin-bottom:6px;border:1px solid rgba(0,0,0,0.06)">'
+            + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px;margin-bottom:4px">'
+            +   '<div style="font-size:11px;color:'+fg+';line-height:1.4;font-weight:500;flex:1">'+escHtml(it.text)+'</div>'
+            +   '<div style="display:flex;gap:2px;flex-shrink:0">'
+            +     '<button onclick="openRmModal(\''+ws.id+'\','+phase+','+it.id+')" style="background:rgba(255,255,255,0.8);border:none;border-radius:3px;cursor:pointer;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0;color:'+fg+'" title="Edit">&#9998;</button>'
+            +     '<button onclick="pendingRmDel('+it.id+')" style="background:rgba(255,255,255,0.8);border:none;border-radius:3px;cursor:pointer;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0;color:#a32d2d" title="Delete">&#10005;</button>'
+            +   '</div>'
+            + '</div>'
+            + pillarChip(it.pillar)
+            + (it.people ? '<div style="font-size:9px;color:'+fg+';opacity:0.85;margin-top:4px">&#128100; '+escHtml(it.people)+'</div>' : '')
+            + (dueFmt ? '<div style="font-size:9px;color:'+fg+';opacity:0.85;margin-top:2px">&#128197; '+dueFmt+'</div>' : '')
+            + (it.comments ? '<div style="font-size:9px;color:'+fg+';opacity:0.75;margin-top:3px;font-style:italic;border-top:1px solid rgba(0,0,0,0.08);padding-top:3px">'+escHtml(it.comments)+'</div>' : '')
+            + '</div>';
+        }
+      });
+      html += '<button onclick="openRmModal(\''+ws.id+'\','+phase+',null)" style="width:100%;background:none;border:1px dashed var(--border-strong);border-radius:5px;cursor:pointer;color:var(--text-muted);padding:4px 0;font-size:10px;font-family:var(--font);margin-top:2px">+ add</button>';
+      html += '</td>';
+    }
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('roadmap-grid').innerHTML = html;
+
+  document.getElementById('ws-comments').innerHTML = WORKSTREAMS.map(function(ws) {
+    var saved = wsComments[ws.id] || '';
+    return '<div style="margin-bottom:16px"><p style="font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:6px">'+ws.name+'</p><textarea class="notes-area" style="min-height:70px" placeholder="Add comments, concerns, or dependencies for this workstream..." onchange="wsComments[\''+ws.id+'\']=this.value">'+saved+'</textarea></div>';
+  }).join('');
+}
+
+function openRmModal(ws, phase, itemId) {
+  document.getElementById('rm-item-id').value = itemId ? String(itemId) : '';
+  if (itemId) {
+    var it = roadmapItems.find(function(x) { return x.id === itemId; });
+    document.getElementById('rm-modal-title').textContent = 'Edit item';
+    document.getElementById('rm-text').value    = it.text;
+    document.getElementById('rm-pillar').value  = it.pillar;
+    document.getElementById('rm-ws').value      = it.ws;
+    document.getElementById('rm-phase').value   = String(it.phase);
+    document.getElementById('rm-people').value  = it.people || '';
+    document.getElementById('rm-due').value     = it.due || '';
+    document.getElementById('rm-comments').value = it.comments || '';
+  } else {
+    document.getElementById('rm-modal-title').textContent = 'Add item';
+    document.getElementById('rm-text').value    = '';
+    document.getElementById('rm-pillar').value  = 'Onboarding';
+    document.getElementById('rm-ws').value      = ws;
+    document.getElementById('rm-phase').value   = String(phase);
+    document.getElementById('rm-people').value  = '';
+    document.getElementById('rm-due').value     = '';
+    document.getElementById('rm-comments').value = '';
+  }
+  document.getElementById('rm-modal-backdrop').style.display = 'flex';
+  setTimeout(function() { document.getElementById('rm-text').focus(); }, 50);
+}
+function closeRmModal() { document.getElementById('rm-modal-backdrop').style.display = 'none'; }
+function saveRmItem() {
+  var text = document.getElementById('rm-text').value.trim();
+  if (!text) { showToast('Item text is required'); return; }
+  var ws      = document.getElementById('rm-ws').value;
+  var phase   = parseInt(document.getElementById('rm-phase').value);
+  var pillar  = document.getElementById('rm-pillar').value;
+  var people  = document.getElementById('rm-people').value.trim();
+  var due     = document.getElementById('rm-due').value;
+  var comments = document.getElementById('rm-comments').value.trim();
+  var rawId   = document.getElementById('rm-item-id').value;
+  var payload={ws:ws,phase:phase,text:text,pillar:pillar,people:people,due:due,comments:comments};
+  if(rawId){apiPut('/roadmap/'+rawId,payload).then(function(u){var i=roadmapItems.findIndex(function(x){return x.id===parseInt(rawId);});if(i>-1)roadmapItems[i]=u;closeRmModal();renderRoadmap();renderOwners();showToast('Item updated');}).catch(function(e){showToast('Error: '+e.message);});}else{apiPost('/roadmap',payload).then(function(c){roadmapItems.push(c);closeRmModal();renderRoadmap();renderOwners();showToast('Item added');}).catch(function(e){showToast('Error: '+e.message);});}
+}
+function pendingRmDel(id) { pendingRoadmapDeleteId = id; renderRoadmap(); }
+function cancelRmDelete() { pendingRoadmapDeleteId = null; renderRoadmap(); }
+function confirmRmDelete(id){apiDelete('/roadmap/'+id).then(function(){roadmapItems=roadmapItems.filter(function(x){return x.id!==id;});pendingRoadmapDeleteId=null;renderRoadmap();renderOwners();showToast('Item deleted');}).catch(function(e){showToast('Error: '+e.message);});}
+
+// ── Owners ────────────────────────────────────────────────────────────────────
+var pillarDRIOverrides = {};
+function getPillarDRI(pillarName) {
+  if (pillarDRIOverrides[pillarName]) return pillarDRIOverrides[pillarName];
+  var MAP = {Onboarding:'Jidesh M',Adoption:'Deepak V',Success:'Deepak V',Retention:'Deepak V',Advocacy:'Suvo',Support:'Anirban M',Intelligence:'Subhajit D',Technology:'Subhajit D',Escalation:'Suvo',People:'Divyatha'};
+  return MAP[pillarName] || '-';
+}
+var ownerChartInstance = null;
+function renderOwners() {
+  var pillarFilter = document.getElementById('ow-filter-pillar') ? document.getElementById('ow-filter-pillar').value : 'all';
+  var phaseLabels = ['Month 1','Month 2','Month 3','Month 4','Month 5','Month 6'];
+  var phaseThemes = ['Standardize','Instrument','Predict','Automate','Optimize','Scale'];
+  var allPillars = pillarFilter === 'all' ? PILLAR_NAMES : [pillarFilter];
+
+  var html = '<table style="width:100%;border-collapse:collapse;min-width:900px"><thead><tr>';
+  html += '<th style="width:170px;text-align:left;padding:10px 12px;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);background:var(--surface)">Pillar / DRI</th>';
+  phaseLabels.forEach(function(ph,i) {
+    html += '<th style="padding:8px 10px;font-size:10px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border-strong);background:var(--surface);text-align:center;min-width:130px"><div style="color:var(--text-secondary)">'+ph+'</div><div style="font-weight:400;text-transform:none;letter-spacing:0;font-size:9px;color:var(--text-muted);margin-top:1px">'+phaseThemes[i]+'</div></th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  allPillars.forEach(function(pillarName) {
+    var pillarData = PILLARS.find(function(p) { return p.name.toLowerCase().includes(pillarName.toLowerCase()); });
+    var priority = pillarData ? pillarData.priority : 'Medium';
+    var priCls = priority === 'Critical' ? 'priority-critical' : priority === 'High' ? 'priority-high' : 'priority-medium';
+    var dri = getPillarDRI(pillarName);
+    var colorParts = (PILLAR_COLORS[pillarName]||'#f2f1ee|#52514e').split('|');
+    var bg = colorParts[0], fg = colorParts[1];
+
+    html += '<tr><td style="padding:10px 12px;border-bottom:0.5px solid var(--border);border-right:0.5px solid var(--border);background:var(--surface);vertical-align:top">'
+      + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="width:8px;height:8px;border-radius:50%;background:'+bg+';border:1.5px solid '+fg+';flex-shrink:0"></span><span style="font-size:12px;font-weight:500;color:var(--text-primary)">'+pillarName+'</span></div>'
+      + '<span class="priority-badge '+priCls+'" style="display:inline-block;margin-bottom:8px">'+priority+'</span>'
+      + '<div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">DRI</div>'
+      + '<input value="'+escHtml(dri)+'" onchange="pillarDRIOverrides[\''+pillarName+'\']=this.value;renderOwners()" style="width:100%;padding:4px 7px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:11px;font-family:var(--font);background:var(--surface);color:var(--text-primary)">'
+      + '</td>';
+
+    for (var phase = 0; phase < 6; phase++) {
+      var items = roadmapItems.filter(function(it) { return it.pillar === pillarName && it.phase === phase; });
+      html += '<td style="padding:8px;border-bottom:0.5px solid var(--border);border-right:0.5px solid var(--border);background:var(--surface);vertical-align:top">';
+      if (!items.length) {
+        html += '<div style="font-size:10px;color:var(--border-strong);text-align:center;padding:8px 0">-</div>';
+      } else {
+        items.forEach(function(it) {
+          var ws = WORKSTREAMS.find(function(w) { return w.id === it.ws; });
+          var wsColors = {lifecycle:'#e6f1fb|#185fa5',intel:'#e1f5ee|#085041',ops:'#faeeda|#633806',people:'#eeedfe|#3c3489'};
+          var wsParts = (wsColors[it.ws]||'#f2f1ee|#52514e').split('|');
+          html += '<div style="background:'+bg+';border-radius:5px;padding:5px 8px;margin-bottom:5px">'
+            + '<div style="font-size:11px;color:'+fg+';line-height:1.4;margin-bottom:3px">'+escHtml(it.text)+'</div>'
+            + '<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:'+wsParts[0]+';color:'+wsParts[1]+';font-weight:500">'+(ws ? ws.name.replace(/^\d+\.\s*/,'').split(' ').slice(0,2).join(' ') : it.ws)+'</span>'
+            + '</div>';
+        });
+      }
+      html += '</td>';
+    }
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('owners-grid').innerHTML = html;
+
+  var ownerMap = {};
+  PILLAR_NAMES.forEach(function(pn) {
+    var dri = getPillarDRI(pn).split('+')[0].trim();
+    var count = roadmapItems.filter(function(it) { return it.pillar === pn; }).length;
+    ownerMap[dri] = (ownerMap[dri] || 0) + count;
+  });
+  var labels = Object.keys(ownerMap);
+  var data = Object.values(ownerMap);
+  var palette = ['#2a78d6','#1baf7a','#eda100','#4a3aa7','#e34948','#d4537e','#eb6834','#1d9e75'];
+  if (ownerChartInstance) ownerChartInstance.destroy();
+  var ctx = document.getElementById('ownerChart').getContext('2d');
+  ownerChartInstance = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:labels, datasets:[{ label:'Roadmap items', data:data, backgroundColor:labels.map(function(_,i){ return palette[i%palette.length]; }), borderRadius:4, borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#898781', font:{size:11}, stepSize:5 }, grid:{ color:'#e1e0d9' } }, y:{ ticks:{ color:'#52514e', font:{size:11} }, grid:{ display:false } } } }
+  });
+}
+
+// ── Action Item Tracker ───────────────────────────────────────────────────────
+var ACTION_STATUS = {
+  open:       { label:'Open',        bg:'#e6f1fb', fg:'#0c447c' },
+  inprogress: { label:'In Progress', bg:'#faeeda', fg:'#633806' },
+  done:       { label:'Done',        bg:'#eaf3de', fg:'#27500a' },
+  blocked:    { label:'Blocked',     bg:'#fcebeb', fg:'#791f1f' },
+};
+
+function renderActions() {
+  var tbody = document.getElementById('actions-tbody');
+  var empty = document.getElementById('actions-empty');
+  var chips = document.getElementById('action-summary-chips');
+  if (!tbody) return;
+
+  var counts = { open:0, inprogress:0, done:0, blocked:0 };
+  actionItems.forEach(function(a) { if (counts[a.status] !== undefined) counts[a.status]++; });
+  chips.innerHTML = Object.entries(counts).map(function(entry) {
+    var k=entry[0], v=entry[1], s=ACTION_STATUS[k];
+    return '<span style="font-size:12px;padding:4px 12px;border-radius:20px;background:'+s.bg+';color:'+s.fg+';font-weight:500">'+s.label+': '+v+'</span>';
+  }).join('');
+
+  if (!actionItems.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = actionItems.map(function(a, rowIdx) {
+    var s = ACTION_STATUS[a.status] || ACTION_STATUS.open;
+    var dueFmt = a.due ? new Date(a.due).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '-';
+    var overdue = a.due && a.status !== 'done' && new Date(a.due) < new Date();
+    var dueColor = overdue ? '#e34948' : 'var(--text-secondary)';
+    var statusOpts = Object.entries(ACTION_STATUS).map(function(e) {
+      return '<option value="'+e[0]+'"'+(e[0]===a.status?' selected':'')+'>'+e[1].label+'</option>';
+    }).join('');
+
+    if (pendingActionDeleteId === a.id) {
+      return '<tr style="background:#fff5f5">'
+        +'<td style="padding:10px 12px;color:var(--text-muted);font-size:12px">'+(rowIdx+1)+'</td>'
+        +'<td colspan="5" style="padding:10px 12px;font-size:13px;color:#791f1f;font-weight:500">Delete this action item?</td>'
+        +'<td style="padding:10px 12px;white-space:nowrap">'
+        +'<button onclick="confirmActionDelete('+a.id+')" style="background:#e34948;border:none;border-radius:var(--radius);cursor:pointer;color:#fff;padding:4px 10px;font-size:11px;font-weight:500;margin-right:4px">Confirm</button>'
+        +'<button onclick="cancelActionDelete()" style="background:var(--surface-alt);border:0.5px solid var(--border-strong);border-radius:var(--radius);cursor:pointer;color:var(--text-secondary);padding:4px 10px;font-size:11px">Cancel</button>'
+        +'</td></tr>';
+    }
+    return '<tr style="'+(a.status==='done'?'opacity:0.65':'')+'">'
+      +'<td style="padding:10px 12px;color:var(--text-muted);font-size:12px">'+(rowIdx+1)+'</td>'
+      +'<td style="padding:10px 12px"><div style="font-size:13px;font-weight:500;color:var(--text-primary);line-height:1.4">'+escHtml(a.detail)+'</div></td>'
+      +'<td style="padding:10px 12px;font-size:13px;color:var(--text-secondary)">'+escHtml(a.owner||'-')+'</td>'
+      +'<td style="padding:10px 12px;font-size:13px;color:'+dueColor+(overdue?';font-weight:500':'')+'">'+(dueFmt)+'</td>'
+      +'<td style="padding:10px 12px"><select onchange="updateActionStatus('+a.id+',this.value)" style="padding:3px 7px;border-radius:var(--radius);border:0.5px solid var(--border-strong);font-size:11px;background:'+s.bg+';color:'+s.fg+';cursor:pointer">'+statusOpts+'</select></td>'
+      +'<td style="padding:10px 12px;font-size:12px;color:var(--text-secondary);max-width:200px">'+escHtml(a.comments||'')+'</td>'
+      +'<td style="padding:10px 12px;white-space:nowrap">'
+      +'<button onclick="openActionModal('+a.id+')" style="background:var(--accent-bg);border:0.5px solid var(--border-strong);border-radius:var(--radius);cursor:pointer;color:var(--accent-text);padding:4px 8px;font-size:11px;margin-right:4px">Edit</button>'
+      +'<button onclick="deleteActionItem('+a.id+')" style="background:#fcebeb;border:0.5px solid var(--border-strong);border-radius:var(--radius);cursor:pointer;color:#791f1f;padding:4px 8px;font-size:11px">Delete</button>'
+      +'</td></tr>';
+  }).join('');
+}
+
+function openActionModal(id) {
+  document.getElementById('action-item-id').value = id ? String(id) : '';
+  if (id) {
+    var a = actionItems.find(function(x) { return x.id === id; });
+    document.getElementById('action-modal-title').textContent = 'Edit action item';
+    document.getElementById('action-detail').value   = a.detail || '';
+    document.getElementById('action-owner').value    = a.owner || '';
+    document.getElementById('action-due').value      = a.due || '';
+    document.getElementById('action-status').value   = a.status || 'open';
+    document.getElementById('action-comments').value = a.comments || '';
+  } else {
+    document.getElementById('action-modal-title').textContent = 'Add action item';
+    ['action-detail','action-owner','action-due','action-comments'].forEach(function(id) { document.getElementById(id).value=''; });
+    document.getElementById('action-status').value = 'open';
+  }
+  document.getElementById('action-modal-backdrop').style.display = 'flex';
+  setTimeout(function() { document.getElementById('action-detail').focus(); }, 50);
+}
+function closeActionModal() { document.getElementById('action-modal-backdrop').style.display = 'none'; }
+function saveActionItem() {
+  var detail = document.getElementById('action-detail').value.trim();
+  if (!detail) { showToast('Item details are required'); return; }
+  var obj = {
+    detail:   detail,
+    owner:    document.getElementById('action-owner').value.trim(),
+    due:      document.getElementById('action-due').value,
+    status:   document.getElementById('action-status').value,
+    comments: document.getElementById('action-comments').value.trim(),
+  };
+  var rawId = document.getElementById('action-item-id').value;
+  if(rawId){apiPut('/actions/'+rawId,obj).then(function(u){var i=actionItems.findIndex(function(x){return x.id===parseInt(rawId);});if(i>-1)actionItems[i]=u;closeActionModal();renderActions();showToast('Action item updated');}).catch(function(e){showToast('Error: '+e.message);});}else{apiPost('/actions',obj).then(function(c){actionItems.push(c);closeActionModal();renderActions();showToast('Action item added');}).catch(function(e){showToast('Error: '+e.message);});}
+}
+function updateActionStatus(id,status){var item=actionItems.find(function(x){return x.id===id;});if(!item)return;apiPut('/actions/'+id,Object.assign({},item,{status:status})).then(function(u){var i=actionItems.findIndex(function(x){return x.id===id;});if(i>-1){actionItems[i]=u;renderActions();}}).catch(function(e){showToast('Error: '+e.message);});}
+function deleteActionItem(id) { pendingActionDeleteId = id; renderActions(); }
+function cancelActionDelete() { pendingActionDeleteId = null; renderActions(); }
+function confirmActionDelete(id){apiDelete('/actions/'+id).then(function(){actionItems=actionItems.filter(function(x){return x.id!==id;});pendingActionDeleteId=null;renderActions();showToast('Action item deleted');}).catch(function(e){showToast('Error: '+e.message);});}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+var sectionMeta = {
+  maturity: { title:'Diagnose - Maturity Assessment', desc:'Review maturity levels, evidence, and confidence across all 10 CX pillars', day:1 },
+  metrics:  { title:'Plan - Metrics & Targets', desc:'Review KPIs across all pillars and set H2 targets', day:2 },
+  roadmap:  { title:'Plan - H2 Roadmap', desc:'Review 6-month workstream plan and confirm sequencing', day:2 },
+  owners:   { title:'Workstream wise plan', desc:'Pillar x month view of all planned items, auto-synced from the H2 Roadmap', day:2 },
+  actions:  { title:'Action Logs - Action Item Tracker', desc:'Track, assign, and close all action items from the workshop', day:3 },
+  notes:    { title:'Action Logs - Workshop Notes', desc:'Capture notes, open questions, and parking lot items', day:3 },
+};
+
+function navigate(id) {
+  document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  var section = document.getElementById('section-'+id);
+  if (section) section.classList.add('active');
+  var navEl = document.querySelector('[onclick="navigate(\''+id+'\')"]');
+  if (navEl) navEl.classList.add('active');
+  var meta = sectionMeta[id];
+  if (meta) {
+    document.getElementById('section-title').textContent = meta.title;
+    document.getElementById('section-desc').textContent  = meta.desc;
+  }
+  completedSections.add(id);
+  updateProgress();
+  if (id === 'actions') renderActions();
+  if (id === 'owners')  renderOwners();
+}
+
+function updateProgress() {
+  var total = Object.keys(sectionMeta).length;
+  var pct = Math.round((completedSections.size / total) * 100);
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+// ── Metrics filter ────────────────────────────────────────────────────────────
+function switchInnerTab(section, tab) {
+  document.querySelectorAll('#section-'+section+' .inner-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('#section-'+section+' .inner-section').forEach(function(s) { s.classList.remove('active'); });
+  var el = document.querySelector('#section-'+section+' [onclick="switchInnerTab(\''+section+'\',\''+tab+'\')"]');
+  if (el) el.classList.add('active');
+  var sec = document.getElementById(section+'-inner-'+tab);
+  if (sec) sec.classList.add('active');
+}
+
+// ── Notes ─────────────────────────────────────────────────────────────────────
+function saveNotes() { showToast('Notes saved'); completedSections.add('notes'); updateProgress(); }
+
+// ── Init ──
+async function init(){setDbStatus(false,'Connecting...');await loadAllFromDB();renderPillars();renderMetrics();renderRoadmap();renderOwners();setTimeout(renderMaturityChart,100);completedSections.add('maturity');updateProgress();}
+init();
+
+document.getElementById('metric-modal-backdrop').addEventListener('click', function(e) {
+  if (e.target === this) closeMetricModal();
+});
+document.getElementById('rm-modal-backdrop').addEventListener('click', function(e) {
+  if (e.target === this) closeRmModal();
+});
+document.getElementById('action-modal-backdrop').addEventListener('click', function(e) {
+  if (e.target === this) closeActionModal();
+});
+
+document.getElementById('metric-modal-backdrop').addEventListener('click',function(e){if(e.target===this)closeMetricModal();});
+document.getElementById('rm-modal-backdrop').addEventListener('click',function(e){if(e.target===this)closeRmModal();});
+document.getElementById('action-modal-backdrop').addEventListener('click',function(e){if(e.target===this)closeActionModal();});
+</script>
+</body>
+</html>

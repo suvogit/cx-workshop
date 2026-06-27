@@ -40,16 +40,24 @@ async function initDB() {
       id          SERIAL PRIMARY KEY,
       pillar      TEXT NOT NULL,
       name        TEXT NOT NULL,
+      dri         TEXT DEFAULT '',
       question    TEXT DEFAULT '',
       formula     TEXT DEFAULT '',
       type        TEXT DEFAULT 'Leading' CHECK (type IN ('Leading','Lagging')),
+      l1          TEXT DEFAULT '',
       l2          TEXT DEFAULT '',
       l3          TEXT DEFAULT '',
       l4          TEXT DEFAULT '',
+      l5          TEXT DEFAULT '',
+      l6          TEXT DEFAULT '',
       h2_target   TEXT DEFAULT '',
       created_at  TIMESTAMPTZ DEFAULT NOW(),
       updated_at  TIMESTAMPTZ DEFAULT NOW()
     );
+    ALTER TABLE metrics ADD COLUMN IF NOT EXISTS dri TEXT DEFAULT '';
+    ALTER TABLE metrics ADD COLUMN IF NOT EXISTS l1  TEXT DEFAULT '';
+    ALTER TABLE metrics ADD COLUMN IF NOT EXISTS l5  TEXT DEFAULT '';
+    ALTER TABLE metrics ADD COLUMN IF NOT EXISTS l6  TEXT DEFAULT '';
     CREATE TABLE IF NOT EXISTS dri_assignments (
       pillar      TEXT PRIMARY KEY,
       dri         TEXT NOT NULL,
@@ -210,26 +218,28 @@ app.get('/api/metrics', async (req, res) => {
 });
 
 app.post('/api/metrics', async (req, res) => {
-  const { pillar, name, question, formula, type, l2, l3, l4, h2_target } = req.body;
+  const { pillar, name, dri, question, formula, type, l1, l2, l3, l4, l5, l6, h2_target } = req.body;
   try {
     const { rows } = await pool.query(
-      `INSERT INTO metrics (pillar, name, question, formula, type, l2, l3, l4, h2_target)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-      [pillar, name, question||'', formula||'', type||'Leading', l2||'', l3||'', l4||'', h2_target||'']
+      `INSERT INTO metrics (pillar, name, dri, question, formula, type, l1, l2, l3, l4, l5, l6, h2_target)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+      [pillar, name, dri||'', question||'', formula||'', type||'Leading',
+       l1||'', l2||'', l3||'', l4||'', l5||'', l6||'', h2_target||'']
     );
     res.status(201).json(dbToMetric(rows[0]));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.put('/api/metrics/:id', async (req, res) => {
-  const { pillar, name, question, formula, type, l2, l3, l4, h2_target } = req.body;
+  const { pillar, name, dri, question, formula, type, l1, l2, l3, l4, l5, l6, h2_target } = req.body;
   try {
     const { rows } = await pool.query(
       `UPDATE metrics
-       SET pillar=$1, name=$2, question=$3, formula=$4, type=$5,
-           l2=$6, l3=$7, l4=$8, h2_target=$9, updated_at=NOW()
-       WHERE id=$10 RETURNING *`,
-      [pillar, name, question||'', formula||'', type||'Leading', l2||'', l3||'', l4||'', h2_target||'', req.params.id]
+       SET pillar=$1, name=$2, dri=$3, question=$4, formula=$5, type=$6,
+           l1=$7, l2=$8, l3=$9, l4=$10, l5=$11, l6=$12, h2_target=$13, updated_at=NOW()
+       WHERE id=$14 RETURNING *`,
+      [pillar, name, dri||'', question||'', formula||'', type||'Leading',
+       l1||'', l2||'', l3||'', l4||'', l5||'', l6||'', h2_target||'', req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
     res.json(dbToMetric(rows[0]));
@@ -248,13 +258,17 @@ function dbToMetric(r) {
     id:        r.id,
     pillar:    r.pillar,
     name:      r.name,
-    question:  r.question || '',
-    formula:   r.formula  || '',
+    dri:       r.dri       || '',
+    question:  r.question  || '',
+    formula:   r.formula   || '',
     type:      r.type,
-    l2:        r.l2       || '',
-    l3:        r.l3       || '',
-    l4:        r.l4       || '',
-    h2_target: r.h2_target|| '',
+    l1:        r.l1        || '',
+    l2:        r.l2        || '',
+    l3:        r.l3        || '',
+    l4:        r.l4        || '',
+    l5:        r.l5        || '',
+    l6:        r.l6        || '',
+    h2_target: r.h2_target || '',
   };
 }
 
@@ -323,10 +337,10 @@ app.post('/api/metrics/bulk', async (req, res) => {
     const created = [];
     for (const m of rows) {
       const { rows: r } = await client.query(
-        `INSERT INTO metrics (pillar, name, question, formula, type, l2, l3, l4, h2_target)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-        [m.pillar||'', m.name||'', m.question||'', m.formula||'',
-         m.type||'Leading', m.l2||'', m.l3||'', m.l4||'', m.h2_target||'']
+        `INSERT INTO metrics (pillar, name, dri, question, formula, type, l1, l2, l3, l4, l5, l6, h2_target)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+        [m.pillar||'', m.name||'', m.dri||'', m.question||'', m.formula||'',
+         m.type||'Leading', m.l1||'', m.l2||'', m.l3||'', m.l4||'', m.l5||'', m.l6||'', m.h2_target||'']
       );
       created.push(dbToMetric(r[0]));
     }
